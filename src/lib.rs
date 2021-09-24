@@ -5,7 +5,7 @@
 //! primitive integer types.
 
 #![deny(missing_docs)]
-#![no_std]
+//#![no_std]
 
 #[cfg(test)]
 extern crate alloc;
@@ -16,6 +16,8 @@ mod fmt;
 pub mod intrinsics;
 mod iter;
 mod ops;
+#[cfg(feature = "serde")]
+pub mod serde;
 mod uint;
 
 pub use self::convert::AsU256;
