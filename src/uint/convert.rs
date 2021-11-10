@@ -1,6 +1,7 @@
 //! Module contains conversions for [`U256`] to and from primimitive types.
 
-use crate::U256;
+use super::U256;
+use crate::int::I256;
 use core::{convert::TryFrom, mem, num::TryFromIntError};
 
 macro_rules! impl_from {
@@ -70,6 +71,14 @@ impl AsU256 for U256 {
     #[inline]
     fn as_u256(self) -> U256 {
         self
+    }
+}
+
+impl AsU256 for I256 {
+    #[inline]
+    fn as_u256(self) -> U256 {
+        let (hi, lo) = self.into_words();
+        U256::from_words(hi as _, lo as _)
     }
 }
 

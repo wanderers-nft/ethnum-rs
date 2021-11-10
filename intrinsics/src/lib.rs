@@ -5,7 +5,7 @@
 
 use core::mem::MaybeUninit;
 
-pub type U256 = [u128; 2];
+pub type U256 = [u64; 4];
 
 macro_rules! def {
     ($(
@@ -14,7 +14,6 @@ macro_rules! def {
             $($p:ident : $t:ty),*
         ) $(-> $ret:ty)?;
     )*) => {
-        #[allow(improper_ctypes)]
         extern "C" {$(
             link! {
                 concat!("__ethnum_", stringify!($name));
@@ -37,14 +36,19 @@ def! {
     pub fn add2(r: &mut U256, a: &U256);
     pub fn add3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256);
     pub fn uaddc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
+    pub fn iaddc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
 
     pub fn umul2(r: &mut U256, a: &U256);
     pub fn umul3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256);
     pub fn umulc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
+    pub fn imul2(r: &mut U256, a: &U256);
+    pub fn imul3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256);
+    //pub fn imulc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
 
     pub fn sub2(r: &mut U256, a: &U256);
     pub fn sub3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256);
     pub fn usubc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
+    pub fn isubc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
 
     pub fn ashl2(r: &mut U256, a: u32);
     pub fn ashl3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);

@@ -1,26 +1,26 @@
 //! Module containing macros for implementing `core::ops` traits.
 
-use crate::{intrinsics::*, U256};
+use crate::{intrinsics::*, uint::U256, int::I256};
 use core::{mem::MaybeUninit, ops};
 
 macro_rules! impl_binops {
     ($(
-        $op:ident {
+        $op:ident for $out:ident ($prim:ident) {
             $method:ident =>
             $wrap:path,
             $overflow:path; $msg:expr
         }
     )*) => {$(
-        impl ops::$op<&'_ U256> for &'_ U256 {
-            type Output = U256;
+        impl ops::$op<&'_ $out> for &'_ $out {
+            type Output = $out;
 
             #[inline]
-            fn $method(self, rhs: &'_ U256) -> Self::Output {
+            fn $method(self, rhs: &'_ $out) -> Self::Output {
                 binop!($wrap, $overflow [ self, rhs ] $msg)
             }
         }
 
-        impl_auto_binop!($op { $method });
+        impl_auto_binop!($op for $out ($prim) { $method });
     )*};
 }
 
@@ -43,29 +43,29 @@ macro_rules! binop {
 }
 
 macro_rules! impl_auto_binop {
-    ($op:ident { $method:ident }) => {
+    ($op:ident for $out:ident ($prim:ident) { $method:ident }) => {
         impl_ref_binop! {
-            $op <&U256 ; &U256>::$method (rhs) {
-                <U256> for &'_ U256 => { &rhs }
-                <&'_ U256> for U256 => { rhs }
-                <U256> for U256 => { &rhs }
+            $op for $out <&$out ; &$out>::$method (rhs) {
+                <$out> for &'_ $out => { &rhs }
+                <&'_ $out> for $out => { rhs }
+                <$out> for $out => { &rhs }
             }
         }
 
         impl_ref_binop! {
-            $op <&U256 ; U256>::$method (rhs) { u128 } => { U256::new(rhs) }
+            $op for $out <&$out ; $out>::$method (rhs) { $prim } => { $out::new(rhs) }
         }
     };
 }
 
 macro_rules! impl_ref_binop {
     (
-        $op:ident <$ref:ty ; $tr:ty> :: $method:ident ($x:ident) {$(
+        $op:ident for $out:ident <$ref:ty ; $tr:ty> :: $method:ident ($x:ident) {$(
             <$rhs:ty> for $lhs:ty => $conv:block
         )*}
     ) => {$(
         impl ops::$op<$rhs> for $lhs {
-            type Output = U256;
+            type Output = $out;
 
             #[inline]
             fn $method(self, $x: $rhs) -> Self::Output {
@@ -74,25 +74,29 @@ macro_rules! impl_ref_binop {
         }
     )*};
     (
-        $op:ident <$ref:ty ; $tr:ty> :: $method:ident ($x:ident) {
+        $op:ident for $out:ident <$ref:ty ; $tr:ty> :: $method:ident ($x:ident) {
             $($rhs:ty),* $(,)?
         } => $conv:block
     ) => {$(
         impl_ref_binop! {
-            $op <&U256 ; $tr>::$method (rhs) {
-                <&'_ $rhs> for &'_ U256 => { let $x = *rhs; $conv }
-                <&'_ $rhs> for U256 => { let $x = *rhs; $conv }
-                <$rhs> for &'_ U256 => { let $x = rhs; $conv }
-                <$rhs> for U256 => { let $x = rhs; $conv }
+            $op for $out <&$out ; $tr>::$method (rhs) {
+                <&'_ $rhs> for &'_ $out => { let $x = *rhs; $conv }
+                <&'_ $rhs> for $out => { let $x = *rhs; $conv }
+                <$rhs> for &'_ $out => { let $x = rhs; $conv }
+                <$rhs> for $out => { let $x = rhs; $conv }
             }
         }
     )*};
 }
 
 impl_binops! {
-    Add { add => add3, uaddc; "add with overflow" }
-    Mul { mul => umul3, umulc; "multiply with overflow" }
-    Sub { sub => sub3, usubc; "subtract with overflow" }
+    Add for U256 (u128) { add => add3, uaddc; "add with overflow" }
+    Mul for U256 (u128) { mul => umul3, umulc; "multiply with overflow" }
+    Sub for U256 (u128) { sub => sub3, usubc; "subtract with overflow" }
+
+    Add for I256 (i128) { add => add3, iaddc; "add with overflow" }
+    Mul for I256 (i128) { mul => imul3, imulc; "multiply with overflow" }
+    Sub for I256 (i128) { sub => sub3, isubc; "subtract with overflow" }
 }
 
 impl ops::Div for &'_ U256 {

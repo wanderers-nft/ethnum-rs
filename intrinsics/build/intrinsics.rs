@@ -44,6 +44,11 @@ def! {
         r.write(res);
         carry
     }
+    pub unsafe fn iaddc(r: &mut MaybeUninit<i128>, a: &i128, b: &i128) -> bool {
+        let (res, carry) = a.overflowing_add(*b);
+        r.write(res);
+        carry
+    }
 
     pub unsafe fn sub2(r: &mut u128, a: &u128) {
         *r -= *a;
@@ -53,6 +58,11 @@ def! {
         r.write(res);
     }
     pub unsafe fn usubc(r: &mut MaybeUninit<u128>, a: &u128, b: &u128) -> bool {
+        let (res, carry) = a.overflowing_sub(*b);
+        r.write(res);
+        carry
+    }
+    pub unsafe fn isubc(r: &mut MaybeUninit<i128>, a: &i128, b: &i128) -> bool {
         let (res, carry) = a.overflowing_sub(*b);
         r.write(res);
         carry
@@ -71,11 +81,32 @@ def! {
         carry
     }
 
+    pub unsafe fn imul2(r: &mut i128, a: &i128) {
+        *r *= *a;
+    }
+    pub unsafe fn imul3(r: &mut MaybeUninit<i128>, a: &i128, b: &i128) {
+        let res = a.wrapping_mul(*b);
+        r.write(res);
+    }
+    // pub unsafe fn imulc(r: &mut MaybeUninit<i128>, a: &i128, b: &i128) -> bool {
+    //     let (res, carry) = a.overflowing_mul(*b);
+    //     r.write(res);
+    //     carry
+    // }
+
     pub unsafe fn ashl2(r: &mut u128, a: u32) {
         *r <<= a;
     }
     pub unsafe fn ashl3(r: &mut MaybeUninit<u128>, a: &u128, b: u32) {
         let res = a.wrapping_shl(b);
+        r.write(res);
+    }
+
+    pub unsafe fn ashr2(r: &mut i128, a: u32) {
+        *r >>= a;
+    }
+    pub unsafe fn ashr3(r: &mut MaybeUninit<i128>, a: &i128, b: u32) {
+        let res = a.wrapping_shr(b);
         r.write(res);
     }
 

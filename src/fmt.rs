@@ -4,7 +4,7 @@
 //! implementation for primitive integer types:
 //! https://doc.rust-lang.org/src/core/fmt/num.rs.html
 
-use crate::{AsU256, U256};
+use crate::uint::{AsU256, U256};
 use core::{
     fmt,
     mem::{self, MaybeUninit},
