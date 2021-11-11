@@ -56,6 +56,14 @@ macro_rules! impl_ops {
                 }
             }
         }
+
+        __impl_ops_bitwise! {
+            for $int | $prim
+
+            impl BitAnd { & bitand }
+            impl BitOr  { | bitor  }
+            impl BitXor { ^ bitxor }
+        }
     };
 }
 
@@ -112,6 +120,48 @@ macro_rules! __impl_ops_binop {
     )*};
 }
 
+macro_rules! __impl_ops_binop_extra_variants {
+    (
+        impl $op:ident for $int:ident | $prim:ident { $method:ident = $x:tt }
+    ) => {
+        __impl_ops_binop_ref! {
+            impl $op for $int {
+                $method(a: &'_  $int, b:      $int) {  a $x &b };
+                $method(a:      $int, b: &'_  $int) { &a $x  b };
+                $method(a:      $int, b:      $int) { &a $x &b };
+
+                $method(a: &'_  $int, b:     $prim) { a $x $int::new(b) };
+                $method(a: &'_  $int, b: &'_ $prim) {  a $x *b };
+                $method(a:      $int, b: &'_ $prim) { &a $x *b };
+                $method(a:      $int, b:     $prim) { &a $x  b };
+
+                $method(a:     $prim, b: &'_  $int) { $int::new(a) $x b };
+                $method(a: &'_ $prim, b: &'_  $int) { *a $x  b };
+                $method(a: &'_ $prim, b:      $int) { *a $x &b };
+                $method(a:     $prim, b:      $int) {  a $x &b };
+            }
+        }
+    };
+}
+
+macro_rules! __impl_ops_binop_ref {
+    (
+        impl $op:ident for $int:ident {$(
+            $method:ident($lhs:ident: $lhst:ty, $rhs:ident: $rhst:ty) $impl:block;
+        )*}
+    ) => {$(
+        impl ::core::ops::$op<$rhst> for $lhst {
+            type Output = $int;
+
+            #[inline]
+            fn $method(self, rhs: $rhst) -> Self::Output {
+                let ($lhs, $rhs) = (self, rhs);
+                $impl
+            }
+        }
+    )*}
+}
+
 macro_rules! __impl_ops_divmod {
     (
         for $int:ident | $prim:ident
@@ -140,30 +190,6 @@ macro_rules! __impl_ops_divmod {
             impl $op for $int | $prim { $method = $x }
         }
     )*};
-}
-
-macro_rules! __impl_ops_binop_extra_variants {
-    (
-        impl $op:ident for $int:ident | $prim:ident { $method:ident = $x:tt }
-    ) => {
-        __impl_ops_binop_ref! {
-            impl $op for $int {
-                $method(a: &'_  $int, b:      $int) {  a $x &b };
-                $method(a:      $int, b: &'_  $int) { &a $x  b };
-                $method(a:      $int, b:      $int) { &a $x &b };
-
-                $method(a: &'_  $int, b:     $prim) { a $x $int::new(b) };
-                $method(a: &'_  $int, b: &'_ $prim) {  a $x *b };
-                $method(a:      $int, b: &'_ $prim) { &a $x *b };
-                $method(a:      $int, b:     $prim) { &a $x  b };
-
-                $method(a:     $prim, b: &'_  $int) { $int::new(a) $x b };
-                $method(a: &'_ $prim, b: &'_  $int) { *a $x  b };
-                $method(a: &'_ $prim, b:      $int) { *a $x &b };
-                $method(a:     $prim, b:      $int) {  a $x &b };
-            }
-        }
-    };
 }
 
 macro_rules! __impl_ops_shift {
@@ -246,24 +272,6 @@ macro_rules! __impl_ops_shift_extra_variants {
     )*};
 }
 
-macro_rules! __impl_ops_binop_ref {
-    (
-        impl $op:ident for $int:ident {$(
-            $method:ident($lhs:ident: $lhst:ty, $rhs:ident: $rhst:ty) $impl:block;
-        )*}
-    ) => {$(
-        impl ::core::ops::$op<$rhst> for $lhst {
-            type Output = $int;
-
-            #[inline]
-            fn $method(self, rhs: $rhst) -> Self::Output {
-                let ($lhs, $rhs) = (self, rhs);
-                $impl
-            }
-        }
-    )*}
-}
-
 macro_rules! __impl_ops_unop {
     (
         impl $op:ident for $int:ident {
@@ -290,4 +298,30 @@ macro_rules! __impl_ops_unop {
             }
         }
     };
+}
+
+macro_rules! __impl_ops_bitwise {
+    (
+        for $int:ident | $prim:ident
+        $(
+            impl $op:ident {
+                $x:tt $method:ident
+            }
+        )*
+    ) => {$(
+        impl ::core::ops::$op<&'_ $int> for &'_ $int {
+            type Output = $int;
+
+            #[inline]
+            fn $method(self, rhs: &'_ $int) -> Self::Output {
+                let $int([a0, a1]) = self;
+                let $int([b0, b1]) = rhs;
+                $int([a0 $x b0, a1 $x b1])
+            }
+        }
+
+        __impl_ops_binop_extra_variants! {
+            impl $op for $int | $prim { $method = $x }
+        }
+    )*};
 }

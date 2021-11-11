@@ -205,6 +205,8 @@ impl ops::Not for &'_ U256 {
     }
 }
 
+// ----
+
 macro_rules! impl_bitwiseops {
     ($(
         $op:ident { $method:ident }

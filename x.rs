@@ -13,6 +13,10 @@ mod ops {
     use super::I256;
     use crate::intrinsics::*;
     use core::mem::MaybeUninit;
+    #[doc = " A wrapper around `add2` that uses `I256`."]
+    fn iadd2(_: &mut I256, _: &I256) {
+        ::core::panicking::panic("not yet implemented")
+    }
     #[doc = " A wrapper around `ashl2` that uses `I256`."]
     fn _ishl2(_: &mut I256, _: u32) {
         ::core::panicking::panic("not yet implemented")
@@ -37,114 +41,6 @@ mod ops {
                     ));
                 }
             }
-            unsafe { result.assume_init() }
-        }
-    }
-    impl ::core::ops::Mul for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn mul(self, rhs: Self) -> Self::Output {
-            let mut result = ::core::mem::MaybeUninit::uninit();
-            #[cfg(debug_assertions)]
-            {
-                if imulc(&mut result, self, rhs) {
-                    ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
-                        &["attempt to multiply with overflow"],
-                        &match () {
-                            _args => [],
-                        },
-                    ));
-                }
-            }
-            unsafe { result.assume_init() }
-        }
-    }
-    impl ::core::ops::Sub for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn sub(self, rhs: Self) -> Self::Output {
-            let mut result = ::core::mem::MaybeUninit::uninit();
-            #[cfg(debug_assertions)]
-            {
-                if isubc(&mut result, self, rhs) {
-                    ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
-                        &["attempt to subtract with overflow"],
-                        &match () {
-                            _args => [],
-                        },
-                    ));
-                }
-            }
-            unsafe { result.assume_init() }
-        }
-    }
-    impl ::core::ops::Div for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: Self) -> Self::Output {
-            if *rhs == 0 {
-                ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
-                    &["attempt to divide by zero"],
-                    &match () {
-                        _args => [],
-                    },
-                ));
-            }
-            let mut result = ::core::mem::MaybeUninit::uninit();
-            idiv3(&mut result, self, rhs);
-            unsafe { result.assume_init() }
-        }
-    }
-    impl ::core::ops::Rem for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: Self) -> Self::Output {
-            if *rhs == 0 {
-                ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
-                    &["attempt to calculate the remainder with a divisor of zero"],
-                    &match () {
-                        _args => [],
-                    },
-                ));
-            }
-            let mut result = ::core::mem::MaybeUninit::uninit();
-            irem3(&mut result, self, rhs);
-            unsafe { result.assume_init() }
-        }
-    }
-    impl ::core::ops::Shl<u32> for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn shl(self, rhs: u32) -> Self::Output {
-            #[cfg(debug_assertions)]
-            if rhs > 0xff {
-                ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
-                    &["attempt to shift left with overflow"],
-                    &match () {
-                        _args => [],
-                    },
-                ));
-            }
-            let mut result = ::core::mem::MaybeUninit::uninit();
-            ishl3(&mut result, self, rhs);
-            unsafe { result.assume_init() }
-        }
-    }
-    impl ::core::ops::Shr<u32> for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn shr(self, rhs: u32) -> Self::Output {
-            #[cfg(debug_assertions)]
-            if rhs > 0xff {
-                ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
-                    &["attempt to shift right with overflow"],
-                    &match () {
-                        _args => [],
-                    },
-                ));
-            }
-            let mut result = ::core::mem::MaybeUninit::uninit();
-            ashr3(&mut result, self, rhs);
             unsafe { result.assume_init() }
         }
     }
@@ -258,114 +154,23 @@ mod ops {
             }
         }
     }
-    impl ::core::ops::Div<I256> for &'_ I256 {
+    impl ::core::ops::Mul for &'_ I256 {
         type Output = I256;
         #[inline]
-        fn div(self, rhs: I256) -> Self::Output {
-            let (a, b) = (self, rhs);
+        fn mul(self, rhs: Self) -> Self::Output {
+            let mut result = ::core::mem::MaybeUninit::uninit();
+            #[cfg(debug_assertions)]
             {
-                a / &b
+                if imulc(&mut result, self, rhs) {
+                    ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
+                        &["attempt to multiply with overflow"],
+                        &match () {
+                            _args => [],
+                        },
+                    ));
+                }
             }
-        }
-    }
-    impl ::core::ops::Div<&'_ I256> for I256 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: &'_ I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                &a / b
-            }
-        }
-    }
-    impl ::core::ops::Div<I256> for I256 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                &a / &b
-            }
-        }
-    }
-    impl ::core::ops::Div<i128> for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: i128) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                a / I256::new(b)
-            }
-        }
-    }
-    impl ::core::ops::Div<&'_ i128> for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: &'_ i128) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                a / *b
-            }
-        }
-    }
-    impl ::core::ops::Div<&'_ i128> for I256 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: &'_ i128) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                &a / *b
-            }
-        }
-    }
-    impl ::core::ops::Div<i128> for I256 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: i128) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                &a / b
-            }
-        }
-    }
-    impl ::core::ops::Div<&'_ I256> for i128 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: &'_ I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                I256::new(a) / b
-            }
-        }
-    }
-    impl ::core::ops::Div<&'_ I256> for &'_ i128 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: &'_ I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                *a / b
-            }
-        }
-    }
-    impl ::core::ops::Div<I256> for &'_ i128 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                *a / &b
-            }
-        }
-    }
-    impl ::core::ops::Div<I256> for i128 {
-        type Output = I256;
-        #[inline]
-        fn div(self, rhs: I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                a / &b
-            }
+            unsafe { result.assume_init() }
         }
     }
     impl ::core::ops::Mul<I256> for &'_ I256 {
@@ -478,114 +283,23 @@ mod ops {
             }
         }
     }
-    impl ::core::ops::Rem<I256> for &'_ I256 {
+    impl ::core::ops::Sub for &'_ I256 {
         type Output = I256;
         #[inline]
-        fn rem(self, rhs: I256) -> Self::Output {
-            let (a, b) = (self, rhs);
+        fn sub(self, rhs: Self) -> Self::Output {
+            let mut result = ::core::mem::MaybeUninit::uninit();
+            #[cfg(debug_assertions)]
             {
-                a % &b
+                if isubc(&mut result, self, rhs) {
+                    ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
+                        &["attempt to subtract with overflow"],
+                        &match () {
+                            _args => [],
+                        },
+                    ));
+                }
             }
-        }
-    }
-    impl ::core::ops::Rem<&'_ I256> for I256 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: &'_ I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                &a % b
-            }
-        }
-    }
-    impl ::core::ops::Rem<I256> for I256 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                &a % &b
-            }
-        }
-    }
-    impl ::core::ops::Rem<i128> for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: i128) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                a % I256::new(b)
-            }
-        }
-    }
-    impl ::core::ops::Rem<&'_ i128> for &'_ I256 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: &'_ i128) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                a % *b
-            }
-        }
-    }
-    impl ::core::ops::Rem<&'_ i128> for I256 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: &'_ i128) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                &a % *b
-            }
-        }
-    }
-    impl ::core::ops::Rem<i128> for I256 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: i128) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                &a % b
-            }
-        }
-    }
-    impl ::core::ops::Rem<&'_ I256> for i128 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: &'_ I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                I256::new(a) % b
-            }
-        }
-    }
-    impl ::core::ops::Rem<&'_ I256> for &'_ i128 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: &'_ I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                *a % b
-            }
-        }
-    }
-    impl ::core::ops::Rem<I256> for &'_ i128 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                *a % &b
-            }
-        }
-    }
-    impl ::core::ops::Rem<I256> for i128 {
-        type Output = I256;
-        #[inline]
-        fn rem(self, rhs: I256) -> Self::Output {
-            let (a, b) = (self, rhs);
-            {
-                a % &b
-            }
+            unsafe { result.assume_init() }
         }
     }
     impl ::core::ops::Sub<I256> for &'_ I256 {
@@ -696,6 +410,278 @@ mod ops {
             {
                 a - &b
             }
+        }
+    }
+    impl ::core::ops::Div for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: Self) -> Self::Output {
+            if *rhs == 0 {
+                ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
+                    &["attempt to divide by zero"],
+                    &match () {
+                        _args => [],
+                    },
+                ));
+            }
+            let mut result = ::core::mem::MaybeUninit::uninit();
+            idiv3(&mut result, self, rhs);
+            unsafe { result.assume_init() }
+        }
+    }
+    impl ::core::ops::Div<I256> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a / &b
+            }
+        }
+    }
+    impl ::core::ops::Div<&'_ I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a / b
+            }
+        }
+    }
+    impl ::core::ops::Div<I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a / &b
+            }
+        }
+    }
+    impl ::core::ops::Div<i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a / I256::new(b)
+            }
+        }
+    }
+    impl ::core::ops::Div<&'_ i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a / *b
+            }
+        }
+    }
+    impl ::core::ops::Div<&'_ i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a / *b
+            }
+        }
+    }
+    impl ::core::ops::Div<i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a / b
+            }
+        }
+    }
+    impl ::core::ops::Div<&'_ I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                I256::new(a) / b
+            }
+        }
+    }
+    impl ::core::ops::Div<&'_ I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a / b
+            }
+        }
+    }
+    impl ::core::ops::Div<I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a / &b
+            }
+        }
+    }
+    impl ::core::ops::Div<I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn div(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a / &b
+            }
+        }
+    }
+    impl ::core::ops::Rem for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: Self) -> Self::Output {
+            if *rhs == 0 {
+                ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
+                    &["attempt to calculate the remainder with a divisor of zero"],
+                    &match () {
+                        _args => [],
+                    },
+                ));
+            }
+            let mut result = ::core::mem::MaybeUninit::uninit();
+            irem3(&mut result, self, rhs);
+            unsafe { result.assume_init() }
+        }
+    }
+    impl ::core::ops::Rem<I256> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a % &b
+            }
+        }
+    }
+    impl ::core::ops::Rem<&'_ I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a % b
+            }
+        }
+    }
+    impl ::core::ops::Rem<I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a % &b
+            }
+        }
+    }
+    impl ::core::ops::Rem<i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a % I256::new(b)
+            }
+        }
+    }
+    impl ::core::ops::Rem<&'_ i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a % *b
+            }
+        }
+    }
+    impl ::core::ops::Rem<&'_ i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a % *b
+            }
+        }
+    }
+    impl ::core::ops::Rem<i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a % b
+            }
+        }
+    }
+    impl ::core::ops::Rem<&'_ I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                I256::new(a) % b
+            }
+        }
+    }
+    impl ::core::ops::Rem<&'_ I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a % b
+            }
+        }
+    }
+    impl ::core::ops::Rem<I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a % &b
+            }
+        }
+    }
+    impl ::core::ops::Rem<I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn rem(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a % &b
+            }
+        }
+    }
+    impl ::core::ops::Shl<u32> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn shl(self, rhs: u32) -> Self::Output {
+            #[cfg(debug_assertions)]
+            if rhs > 0xff {
+                ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
+                    &["attempt to shift left with overflow"],
+                    &match () {
+                        _args => [],
+                    },
+                ));
+            }
+            let mut result = ::core::mem::MaybeUninit::uninit();
+            ishl3(&mut result, self, rhs);
+            unsafe { result.assume_init() }
         }
     }
     impl ::core::ops::Shl<&'_ u32> for &'_ I256 {
@@ -1274,6 +1260,24 @@ mod ops {
             }
         }
     }
+    impl ::core::ops::Shr<u32> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn shr(self, rhs: u32) -> Self::Output {
+            #[cfg(debug_assertions)]
+            if rhs > 0xff {
+                ::core::panicking::panic_fmt(::core::fmt::Arguments::new_v1(
+                    &["attempt to shift right with overflow"],
+                    &match () {
+                        _args => [],
+                    },
+                ));
+            }
+            let mut result = ::core::mem::MaybeUninit::uninit();
+            ashr3(&mut result, self, rhs);
+            unsafe { result.assume_init() }
+        }
+    }
     impl ::core::ops::Shr<&'_ u32> for &'_ I256 {
         type Output = I256;
         #[inline]
@@ -1847,6 +1851,409 @@ mod ops {
             let (a, b) = (self, rhs);
             {
                 &a >> b
+            }
+        }
+    }
+    impl ::core::ops::Not for I256 {
+        type Output = I256;
+        #[inline]
+        fn not(self) -> Self::Output {
+            let x = self;
+            {
+                let I256([a, b]) = x;
+                I256([!a, !b])
+            }
+        }
+    }
+    impl ::core::ops::Not for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn not(self) -> Self::Output {
+            let x = self;
+            {
+                let I256([a, b]) = x;
+                I256([!a, !b])
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<&'_ I256> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: &'_ I256) -> Self::Output {
+            let I256([a0, a1]) = self;
+            let I256([b0, b1]) = rhs;
+            I256([a0 & b0, a1 & b1])
+        }
+    }
+    impl ::core::ops::BitAnd<I256> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a & &b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<&'_ I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a & b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a & &b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a & I256::new(b)
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<&'_ i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a & *b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<&'_ i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a & *b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a & b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<&'_ I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                I256::new(a) & b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<&'_ I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a & b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a & &b
+            }
+        }
+    }
+    impl ::core::ops::BitAnd<I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn bitand(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a & &b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<&'_ I256> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: &'_ I256) -> Self::Output {
+            let I256([a0, a1]) = self;
+            let I256([b0, b1]) = rhs;
+            I256([a0 | b0, a1 | b1])
+        }
+    }
+    impl ::core::ops::BitOr<I256> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a | &b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<&'_ I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a | b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a | &b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a | I256::new(b)
+            }
+        }
+    }
+    impl ::core::ops::BitOr<&'_ i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a | *b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<&'_ i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a | *b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a | b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<&'_ I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                I256::new(a) | b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<&'_ I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a | b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a | &b
+            }
+        }
+    }
+    impl ::core::ops::BitOr<I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn bitor(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a | &b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<&'_ I256> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: &'_ I256) -> Self::Output {
+            let I256([a0, a1]) = self;
+            let I256([b0, b1]) = rhs;
+            I256([a0 ^ b0, a1 ^ b1])
+        }
+    }
+    impl ::core::ops::BitXor<I256> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a ^ &b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<&'_ I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a ^ b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<I256> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a ^ &b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a ^ I256::new(b)
+            }
+        }
+    }
+    impl ::core::ops::BitXor<&'_ i128> for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a ^ *b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<&'_ i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: &'_ i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a ^ *b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<i128> for I256 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: i128) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                &a ^ b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<&'_ I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                I256::new(a) ^ b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<&'_ I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: &'_ I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a ^ b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<I256> for &'_ i128 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                *a ^ &b
+            }
+        }
+    }
+    impl ::core::ops::BitXor<I256> for i128 {
+        type Output = I256;
+        #[inline]
+        fn bitxor(self, rhs: I256) -> Self::Output {
+            let (a, b) = (self, rhs);
+            {
+                a ^ &b
+            }
+        }
+    }
+    impl ::core::ops::Neg for I256 {
+        type Output = I256;
+        #[inline]
+        fn neg(self) -> Self::Output {
+            let x = self;
+            {
+                let mut x = !x;
+                iadd2(&mut x, &I256::ONE);
+                x
+            }
+        }
+    }
+    impl ::core::ops::Neg for &'_ I256 {
+        type Output = I256;
+        #[inline]
+        fn neg(self) -> Self::Output {
+            let x = self;
+            {
+                let mut x = !x;
+                iadd2(&mut x, &I256::ONE);
+                x
             }
         }
     }
