@@ -1,6 +1,7 @@
 //! Root module for 256-bit unsigned integer type.
 
 mod api;
+mod cmp;
 mod convert;
 
 pub use self::convert::AsU256;

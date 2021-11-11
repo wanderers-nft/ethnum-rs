@@ -4,10 +4,13 @@
 //! implementation for primitive integer types:
 //! https://doc.rust-lang.org/src/core/fmt/num.rs.html
 
-use crate::uint::{AsU256, U256};
+use crate::{
+    error::pie,
+    uint::{AsU256, U256},
+};
 use core::{
     fmt,
-    mem::{self, MaybeUninit},
+    mem::MaybeUninit,
     num::{IntErrorKind, ParseIntError},
     ptr, slice,
     str::{self, FromStr},
@@ -44,12 +47,6 @@ pub(crate) fn from_str_radix(src: &str, radix: u32) -> Result<U256, ParseIntErro
     }
 
     Ok(result)
-}
-
-/// Helper for constructing `ParseIntError` since there is no public API for
-/// doing so.
-fn pie(kind: IntErrorKind) -> ParseIntError {
-    unsafe { mem::transmute(kind) }
 }
 
 impl FromStr for U256 {
@@ -245,24 +242,6 @@ mod tests {
     use alloc::format;
 
     #[test]
-    fn parse_int_error() {
-        assert_eq!(
-            U256::from_str_radix("", 2).unwrap_err().kind(),
-            &IntErrorKind::Empty,
-        );
-        assert_eq!(
-            U256::from_str_radix("?", 2).unwrap_err().kind(),
-            &IntErrorKind::InvalidDigit,
-        );
-        assert_eq!(
-            U256::from_str_radix("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", 36)
-                .unwrap_err()
-                .kind(),
-            &IntErrorKind::PosOverflow,
-        );
-    }
-
-    #[test]
     fn debug() {
         assert_eq!(
             format!("{:?}", U256::MAX),
@@ -298,5 +277,23 @@ mod tests {
         assert_eq!(format!("{:e}", U256::new(42)), "4.2e1");
         assert_eq!(format!("{:e}", U256::new(10).pow(77)), "1e77");
         assert_eq!(format!("{:E}", U256::new(10).pow(39) * 1337), "1.337E42");
+    }
+
+    #[test]
+    fn errors() {
+        assert_eq!(
+            U256::from_str_radix("", 2).unwrap_err().kind(),
+            &IntErrorKind::Empty,
+        );
+        assert_eq!(
+            U256::from_str_radix("?", 2).unwrap_err().kind(),
+            &IntErrorKind::InvalidDigit,
+        );
+        assert_eq!(
+            U256::from_str_radix("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz", 36)
+                .unwrap_err()
+                .kind(),
+            &IntErrorKind::PosOverflow,
+        );
     }
 }

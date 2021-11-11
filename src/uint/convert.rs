@@ -1,8 +1,8 @@
 //! Module contains conversions for [`U256`] to and from primimitive types.
 
 use super::U256;
-use crate::int::I256;
-use core::{convert::TryFrom, mem, num::TryFromIntError};
+use crate::{error::tfie, int::I256};
+use core::{convert::TryFrom, num::TryFromIntError};
 
 macro_rules! impl_from {
     ($($t:ty),* $(,)?) => {$(
@@ -149,12 +149,6 @@ impl_as_u256_float! {
     f32[u32], f64[u64],
 }
 
-/// Helper for constructing `TryFromIntError` since there is no public API for
-/// for doing so.
-fn tfie() -> TryFromIntError {
-    unsafe { mem::transmute(()) }
-}
-
 macro_rules! impl_try_into {
     ($($t:ty),* $(,)?) => {$(
         impl TryFrom<U256> for $t {
@@ -191,14 +185,4 @@ macro_rules! impl_into_float {
 
 impl_into_float! {
     f32 => as_f32, f64 => as_f64,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn from_int_error_conversion() {
-        assert_eq!(tfie(), u8::try_from(-1).unwrap_err());
-    }
 }

@@ -141,12 +141,6 @@ impl_as_i256_float! {
     f32[u32], f64[u64],
 }
 
-/// Helper for constructing `TryFromIntError` since there is no public API for
-/// for doing so.
-fn tfie() -> TryFromIntError {
-    i8::try_from(0xff_u8).unwrap_err()
-}
-
 macro_rules! impl_try_into {
     ($($t:ty),* $(,)?) => {$(
         impl TryFrom<I256> for $t {
@@ -183,14 +177,4 @@ macro_rules! impl_into_float {
 
 impl_into_float! {
     f32 => as_f32, f64 => as_f64,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn from_int_error_conversion() {
-        assert_eq!(tfie(), u8::try_from(-1).unwrap_err());
-    }
 }
