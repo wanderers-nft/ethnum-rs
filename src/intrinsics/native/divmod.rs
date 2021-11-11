@@ -215,12 +215,7 @@ pub fn urem3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) {
     udivmod4(&mut res, a, b, Some(r));
 }
 
-pub fn idivmod4(
-    _: &mut MaybeUninit<I256>,
-    _: &I256,
-    _: &I256,
-    _: Option<&mut MaybeUninit<I256>>,
-) {
+pub fn idivmod4(_: &mut MaybeUninit<I256>, _: &I256, _: &I256, _: Option<&mut MaybeUninit<I256>>) {
     todo!()
 }
 

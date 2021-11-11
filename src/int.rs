@@ -2,8 +2,8 @@
 
 //mod api;
 mod cmp;
+mod convert;
 mod ops;
-//mod convert;
 
 // todo!()
 mod temp;

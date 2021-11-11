@@ -1,9 +1,8 @@
 //! Module contains conversions for [`I256`] to and from primimitive types.
 
-use crate::U256;
-
 use super::I256;
-use core::{convert::TryFrom, mem, num::TryFromIntError};
+use crate::{error::tfie, uint::U256};
+use core::{convert::TryFrom, num::TryFromIntError};
 
 macro_rules! impl_from {
     ($($t:ty),* $(,)?) => {$(
@@ -111,7 +110,7 @@ macro_rules! impl_as_i256_float {
                 const EXP_MASK: $b = !0 >> <$t>::MANTISSA_DIGITS;
                 const EXP_OFFSET: $b = EXP_MASK / 2;
                 const ABS_MASK: $b = !0 >> 1;
-                const SIG_MASK: $b = !ABS_MASK;
+                //const SIG_MASK: $b = !ABS_MASK;
 
                 let abs = <$t>::from_bits(self.to_bits() & ABS_MASK);
                 if abs >= 1.0 {
@@ -119,13 +118,16 @@ macro_rules! impl_as_i256_float {
                     let exponent = ((bits >> M) & EXP_MASK) - EXP_OFFSET;
                     let mantissa = (bits & MAN_MASK) | MAN_ONE;
                     if exponent <= 52 {
-                        todo!("I256::from(mantissa) >> (52 - exponent)")
+                        I256::from(mantissa) >> (52 - exponent)
                     } else if exponent >= 255 {
-                        if todo!("signum > 0") {
+                        todo!();
+                        /*
+                        if signum > 0 {
                             I256::MAX
                         } else {
                             I256::MIN
                         }
+                        */
                     } else {
                         todo!("I256::from(mantissa) << (exponent - 52)")
                     }
@@ -148,7 +150,7 @@ macro_rules! impl_try_into {
 
             #[inline]
             fn try_from(x: I256) -> Result<Self, Self::Error> {
-                if todo!("x <= <$t>::MAX.as_i256()") {
+                if x <= <$t>::MAX.as_i256() {
                     Ok(*x.low() as _)
                 } else {
                     Err(tfie())

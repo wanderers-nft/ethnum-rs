@@ -53,6 +53,8 @@ def! {
     pub fn ashl2(r: &mut U256, a: u32);
     pub fn ashl3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
 
+    pub fn ashr2(r: &mut U256, a: u32);
+    pub fn ashr3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
     pub fn lshr2(r: &mut U256, a: u32);
     pub fn lshr3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
 

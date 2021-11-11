@@ -12,16 +12,50 @@
 
 use super::I256;
 use crate::intrinsics::*;
+use core::mem::MaybeUninit;
+
+/// A wrapper around `add2` that uses `I256`.
+fn iadd2(_: &mut I256, _: &I256) {
+    todo!()
+}
+
+/// A wrapper around `add3` that uses `I256`.
+#[cfg(not(debug_assertions))]
+fn iadd3(_: &mut MaybeUninit<I256>, _: &I256, _: &I256) {
+    todo!()
+}
+
+/// A wrapper around `sub3` that uses `I256`.
+#[cfg(not(debug_assertions))]
+fn isub3(_: &mut MaybeUninit<I256>, _: &I256, _: &I256) {
+    todo!()
+}
+
+/// A wrapper around `ashl2` that uses `I256`.
+fn _ishl2(_: &mut I256, _: u32) {
+    todo!()
+}
+
+/// A wrapper around `ashl3` that uses `I256`.
+fn ishl3(_: &mut MaybeUninit<I256>, _: &I256, _: u32) {
+    todo!()
+}
 
 impl_ops! {
-    for I256 (i128) {
-        add => add3, iaddc;
+    for I256 | i128 {
+        add => iadd3, iaddc;
         mul => imul3, imulc;
-        sub => sub3, isubc;
+        sub => isub3, isubc;
         div => idiv3;
         rem => irem3;
-        shl => ashl3;
+        shl => ishl3;
         shr => ashr3;
+    }
+}
+
+impl_ops_neg! {
+    for I256 {
+        add => iadd2;
     }
 }
 

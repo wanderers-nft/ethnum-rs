@@ -109,7 +109,6 @@ def! {
         let res = a.wrapping_shr(b);
         r.write(res);
     }
-
     pub unsafe fn lshr2(r: &mut u128, a: u32) {
         *r >>= a;
     }

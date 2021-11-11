@@ -2,7 +2,7 @@
 
 macro_rules! impl_ops {
     (
-        for $int:ident ($prim:ident) {
+        for $int:ident | $prim:ident {
             add => $add3:ident, $addc:ident;
             mul => $mul3:ident, $mulc:ident;
             sub => $sub3:ident, $subc:ident;
@@ -13,46 +13,79 @@ macro_rules! impl_ops {
         }
     ) => {
         __impl_ops_binop! {
-            impl Add for $int {
-                add => $add3, $addc; "add with overflow"
-            }
+            for $int | $prim
 
-            impl Mul for $int {
-                mul => $mul3, $mulc; "multiply with overflow"
+            impl Add {
+                + add => $add3, $addc; "add with overflow"
             }
-
-            impl Sub for $int {
-                sub => $sub3, $subc; "subtract with overflow"
+            impl Mul {
+                * mul => $mul3, $mulc; "multiply with overflow"
+            }
+            impl Sub {
+                - sub => $sub3, $subc; "subtract with overflow"
             }
         }
 
         __impl_ops_divmod! {
-            impl Div for $int {
-                div => $div3; "divide by zero"
-            }
+            for $int | $prim
 
-            impl Rem for $int {
-                rem => $rem3; "calculate the remainder with a divisor of zero"
+            impl Div {
+                / div => $div3; "divide by zero"
+            }
+            impl Rem {
+                % rem => $rem3; "calculate the remainder with a divisor of zero"
             }
         }
 
-        __impl_ops_binop_extra_variants! {
-            impl Add for $int | $prim { add = + }
-            impl Mul for $int | $prim { mul = * }
-            impl Sub for $int | $prim { sub = - }
+        __impl_ops_shift! {
+            for $int
 
-            impl Div for $int | $prim { div = / }
-            impl Rem for $int | $prim { rem = % }
+            impl Shl {
+                << shl => $shl3; "shift left with overflow"
+            }
+            impl Shr {
+                >> shr => $shr3; "shift right with overflow"
+            }
+        }
+
+        __impl_ops_unop! {
+            impl Not for $int {
+                not(x) {
+                    let $int([a, b]) = x;
+                    $int([!a, !b])
+                }
+            }
+        }
+    };
+}
+
+macro_rules! impl_ops_neg {
+    (
+        for $int:ident {
+            add => $add2:ident;
+        }
+    ) => {
+        __impl_ops_unop! {
+            impl Neg for $int {
+                neg(x) {
+                    let mut x = !x;
+                    $add2(&mut x, &$int::ONE);
+                    x
+                }
+            }
         }
     };
 }
 
 macro_rules! __impl_ops_binop {
-    ($(
-        impl $op:ident for $int:ident {
-            $method:ident => $op3:path, $opc:path; $msg:expr
-        }
-    )*) => {$(
+    (
+        for $int:ident | $prim:ident
+        $(
+            impl $op:ident {
+                $x:tt $method:ident => $op3:path, $opc:path; $msg:expr
+            }
+        )*
+    ) => {$(
         impl ::core::ops::$op for &'_ $int {
             type Output = $int;
 
@@ -72,15 +105,22 @@ macro_rules! __impl_ops_binop {
                 unsafe { result.assume_init() }
             }
         }
+
+        __impl_ops_binop_extra_variants! {
+            impl $op for $int | $prim { $method = $x }
+        }
     )*};
 }
 
 macro_rules! __impl_ops_divmod {
-    ($(
-        impl $op:ident for $int:ident {
-            $method:ident => $op3:path; $msg:expr
-        }
-    )*) => {$(
+    (
+        for $int:ident | $prim:ident
+        $(
+            impl $op:ident {
+                $x:tt $method:ident => $op3:path; $msg:expr
+            }
+        )*
+    ) => {$(
         impl ::core::ops::$op for &'_ $int {
             type Output = $int;
 
@@ -95,13 +135,17 @@ macro_rules! __impl_ops_divmod {
                 unsafe { result.assume_init() }
             }
         }
+
+        __impl_ops_binop_extra_variants! {
+            impl $op for $int | $prim { $method = $x }
+        }
     )*};
 }
 
 macro_rules! __impl_ops_binop_extra_variants {
-    ($(
+    (
         impl $op:ident for $int:ident | $prim:ident { $method:ident = $x:tt }
-    )*) => {$(
+    ) => {
         __impl_ops_binop_ref! {
             impl $op for $int {
                 $method(a: &'_  $int, b:      $int) {  a $x &b };
@@ -119,21 +163,131 @@ macro_rules! __impl_ops_binop_extra_variants {
                 $method(a:     $prim, b:      $int) {  a $x &b };
             }
         }
+    };
+}
+
+macro_rules! __impl_ops_shift {
+    (
+        for $int:ident
+        $(
+            impl $op:ident {
+                $x:tt $method:ident => $op3:path; $msg:expr
+            }
+        )*
+    ) => {$(
+        impl ::core::ops::$op<u32> for &'_ $int {
+            type Output = $int;
+
+            #[inline]
+            fn $method(self, rhs: u32) -> Self::Output {
+                #[cfg(debug_assertions)]
+                if rhs > 0xff {
+                    panic!(concat!("attempt to ", $msg));
+                }
+
+                let mut result = ::core::mem::MaybeUninit::uninit();
+                $op3(&mut result, self, rhs);
+
+                unsafe { result.assume_init() }
+            }
+        }
+
+        __impl_ops_shift_extra_variants! {
+            impl $op for $int { $method = $x }
+        }
+    )*};
+}
+
+macro_rules! __impl_ops_shift_extra_variants {
+    (
+        impl $op:ident for $int:ident { $method:ident = $x:tt }
+    ) => {
+        __impl_ops_binop_ref! {
+            impl $op for $int {
+                $method(a: &'_ $int, b: &'_ u32) {  a $x *b };
+                $method(a:     $int, b: &'_ u32) { &a $x *b };
+                $method(a:     $int, b:     u32) { &a $x  b };
+            }
+        }
+
+        __impl_ops_shift_extra_variants! { __inner:
+            impl $op<$crate::int::I256, $crate::uint::U256> for $int {
+                $method = $x
+                |b| { b.as_u32() }
+            }
+        }
+
+        __impl_ops_shift_extra_variants! { __inner:
+            impl $op<i8, i16, i32, i64, i128, isize, u8, u16, u64, u128, usize> for $int {
+                $method = $x
+                |b| { b as u32 }
+            }
+        }
+    };
+
+    (__inner:
+        impl $op:ident <$($lhst:ty),*> for $int:ident
+        { $method:ident = $x:tt |$lhs:ident| $conv:block }
+    ) => {$(
+        __impl_ops_binop_ref! {
+            impl $op for $int {
+                $method(a: &'_ $int, $lhs:     $lhst) {
+                    #[cfg(not(debug_assertions))]
+                    let b = $conv;
+                    #[cfg(debug_assertions)]
+                    let b = u32::try_from($lhs).unwrap_or(u32::MAX);
+                    a $x b
+                };
+                $method(a: &'_ $int,    b: &'_ $lhst) {  a $x *b };
+                $method(a:     $int,    b: &'_ $lhst) { &a $x *b };
+                $method(a:     $int,    b:     $lhst) { &a $x  b };
+            }
+        }
     )*};
 }
 
 macro_rules! __impl_ops_binop_ref {
-    ($(
+    (
         impl $op:ident for $int:ident {$(
-          $method:ident($lhs:ident: $lhst:ty, $rhs:ident: $rhst:ty) $impl:block;
+            $method:ident($lhs:ident: $lhst:ty, $rhs:ident: $rhst:ty) $impl:block;
         )*}
-    )*) => {$($(
+    ) => {$(
         impl ::core::ops::$op<$rhst> for $lhst {
             type Output = $int;
+
+            #[inline]
             fn $method(self, rhs: $rhst) -> Self::Output {
                 let ($lhs, $rhs) = (self, rhs);
                 $impl
             }
         }
-    )*)*}
+    )*}
+}
+
+macro_rules! __impl_ops_unop {
+    (
+        impl $op:ident for $int:ident {
+            $method:ident($self:ident) $impl:block
+        }
+    ) => {
+        impl ::core::ops::$op for $int {
+            type Output = $int;
+
+            #[inline]
+            fn $method(self) -> Self::Output {
+                let $self = self;
+                $impl
+            }
+        }
+
+        impl ::core::ops::$op for &'_ $int {
+            type Output = $int;
+
+            #[inline]
+            fn $method(self) -> Self::Output {
+                let $self = self;
+                $impl
+            }
+        }
+    };
 }
