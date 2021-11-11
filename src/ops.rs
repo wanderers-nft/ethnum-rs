@@ -1,380 +1,74 @@
 //! Module containing macros for implementing `core::ops` traits.
 
-use crate::{intrinsics::*, uint::U256, int::I256};
+use crate::{int::I256, intrinsics::*};
 use core::{mem::MaybeUninit, ops};
 
-macro_rules! impl_binops {
-    ($(
-        $op:ident for $out:ident ($prim:ident) {
-            $method:ident =>
-            $wrap:path,
-            $overflow:path; $msg:expr
+macro_rules! impl_ops {
+    (
+        for $int:ident ($prim:ident) {
+            add => $add3:ident, $addc:ident;
+            mul => $mul3:ident, $mulc:ident;
+            sub => $sub3:ident, $subc:ident;
+            div => $div3:ident;
+            rem => $rem3:ident;
+            shl => $shl3:ident;
+            shr => $shr3:ident;
         }
-    )*) => {$(
-        impl ops::$op<&'_ $out> for &'_ $out {
-            type Output = $out;
-
-            #[inline]
-            fn $method(self, rhs: &'_ $out) -> Self::Output {
-                binop!($wrap, $overflow [ self, rhs ] $msg)
+    ) => {
+        impl_binop! {
+            impl Add for $int {
+                add => $add3, $addc; "add with overflow"
             }
-        }
 
-        impl_auto_binop!($op for $out ($prim) { $method });
-    )*};
-}
-
-macro_rules! binop {
-    ($wrap:path, $overflow:path [ $lhs:expr, $rhs:expr ] $msg:expr) => {{
-        let mut result = MaybeUninit::uninit();
-        #[cfg(not(debug_assertions))]
-        {
-            $wrap(&mut result, $lhs, $rhs);
-        }
-        #[cfg(debug_assertions)]
-        {
-            let overflow = $overflow(&mut result, $lhs, $rhs);
-            if overflow {
-                panic!(concat!("attempt to ", $msg));
+            impl Mul for $int {
+                mul => $mul3, $mulc; "multiply with overflow"
             }
-        }
-        unsafe { result.assume_init() }
-    }};
-}
 
-macro_rules! impl_auto_binop {
-    ($op:ident for $out:ident ($prim:ident) { $method:ident }) => {
-        impl_ref_binop! {
-            $op for $out <&$out ; &$out>::$method (rhs) {
-                <$out> for &'_ $out => { &rhs }
-                <&'_ $out> for $out => { rhs }
-                <$out> for $out => { &rhs }
+            impl Sub for $int {
+                sub => $sub3, $subc; "subtract with overflow"
             }
-        }
-
-        impl_ref_binop! {
-            $op for $out <&$out ; $out>::$method (rhs) { $prim } => { $out::new(rhs) }
         }
     };
 }
 
-macro_rules! impl_ref_binop {
-    (
-        $op:ident for $out:ident <$ref:ty ; $tr:ty> :: $method:ident ($x:ident) {$(
-            <$rhs:ty> for $lhs:ty => $conv:block
-        )*}
-    ) => {$(
-        impl ops::$op<$rhs> for $lhs {
-            type Output = $out;
+macro_rules! impl_binop {
+    ($(
+        impl $op:ident for $int:ident {
+            $method:ident => $op3:path, $opc:path; $msg:expr
+        }
+    )*) => {$(
+        impl ops::$op for &'_ $int {
+            type Output = $int;
 
             #[inline]
-            fn $method(self, $x: $rhs) -> Self::Output {
-                <$ref as ops::$op<$tr>>::$method(&self, $conv)
-            }
-        }
-    )*};
-    (
-        $op:ident for $out:ident <$ref:ty ; $tr:ty> :: $method:ident ($x:ident) {
-            $($rhs:ty),* $(,)?
-        } => $conv:block
-    ) => {$(
-        impl_ref_binop! {
-            $op for $out <&$out ; $tr>::$method (rhs) {
-                <&'_ $rhs> for &'_ $out => { let $x = *rhs; $conv }
-                <&'_ $rhs> for $out => { let $x = *rhs; $conv }
-                <$rhs> for &'_ $out => { let $x = rhs; $conv }
-                <$rhs> for $out => { let $x = rhs; $conv }
+            fn $method(self, rhs: &'_ $int) -> Self::Output {
+                let mut result = MaybeUninit::uninit();
+                #[cfg(not(debug_assertions))]
+                {
+                    $op3(&mut result, self, rhs);
+                }
+                #[cfg(debug_assertions)]
+                {
+                    if $opc(&mut result, self, rhs) {
+                        panic!(concat!("attempt to ", $msg));
+                    }
+                }
+                unsafe { result.assume_init() }
             }
         }
     )*};
 }
 
-impl_binops! {
-    Add for U256 (u128) { add => add3, uaddc; "add with overflow" }
-    Mul for U256 (u128) { mul => umul3, umulc; "multiply with overflow" }
-    Sub for U256 (u128) { sub => sub3, usubc; "subtract with overflow" }
-
-    Add for I256 (i128) { add => add3, iaddc; "add with overflow" }
-    Mul for I256 (i128) { mul => imul3, imulc; "multiply with overflow" }
-    Sub for I256 (i128) { sub => sub3, isubc; "subtract with overflow" }
-}
-
-impl ops::Div for &'_ U256 {
-    type Output = U256;
-
-    #[inline]
-    fn div(self, rhs: Self) -> Self::Output {
-        if rhs == &U256::ZERO {
-            panic!("attempt to divide by zero");
-        }
-
-        let mut result = MaybeUninit::uninit();
-        udiv3(&mut result, self, rhs);
-        unsafe { result.assume_init() }
+impl_ops! {
+    for I256 (i128) {
+        add => add3, iaddc;
+        mul => imul3, imulc;
+        sub => sub3, isubc;
+        div => idiv3;
+        rem => irem3;
+        shl => ashl3;
+        shr => ashr3;
     }
-}
-
-impl_auto_binop!(Div { div });
-
-impl ops::Rem for &'_ U256 {
-    type Output = U256;
-
-    #[inline]
-    fn rem(self, rhs: Self) -> Self::Output {
-        if rhs == &U256::ZERO {
-            panic!("attempt to calculate the remainder with a divisor of zero");
-        }
-
-        let mut result = MaybeUninit::uninit();
-        urem3(&mut result, self, rhs);
-        unsafe { result.assume_init() }
-    }
-}
-
-impl_auto_binop!(Rem { rem });
-
-macro_rules! impl_shifts {
-    ($(
-        $op:ident {
-            $method:ident =>
-            $wrap:path; $msg:expr
-        }
-    )*) => {$(
-        impl ops::$op<u32> for &'_ U256 {
-            type Output = U256;
-
-            #[inline]
-            fn $method(self, rhs: u32) -> Self::Output {
-                shift!($wrap [ self, rhs ] $msg)
-            }
-        }
-
-        impl_ref_binop! {
-            $op <&U256 ; u32>::$method (rhs) {
-                <&'_ u32> for &'_ U256 => { *rhs }
-                <&'_ u32> for U256 => { *rhs }
-                <u32> for U256 => { rhs }
-            }
-        }
-
-        impl_ref_binop! {
-            $op <&U256 ; u32>::$method (rhs) { U256 } => { *rhs.low() as _ }
-        }
-
-        impl_ref_binop! {
-            $op <&U256 ; u32>::$method (rhs) {
-                i8, i16, i32, i64, i128, isize,
-                u8, u16, u64, u128, usize,
-            } => { rhs as _ }
-        }
-    )*};
-}
-
-macro_rules! shift {
-    ($wrap:path [ $lhs:expr, $rhs:expr ] $msg:expr) => {{
-        #[cfg(debug_assertions)]
-        if $rhs > 0xff {
-            panic!(concat!("attempt to ", $msg));
-        }
-
-        let mut result = MaybeUninit::uninit();
-        $wrap(&mut result, $lhs, $rhs);
-
-        unsafe { result.assume_init() }
-    }};
-}
-
-impl_shifts! {
-    Shl { shl => ashl3; "shift left with overflow" }
-    Shr { shr => lshr3; "shift right with overflow" }
-}
-
-impl ops::Not for U256 {
-    type Output = U256;
-
-    #[inline]
-    fn not(self) -> Self::Output {
-        let U256([a, b]) = self;
-        U256([!a, !b])
-    }
-}
-
-impl ops::Not for &'_ U256 {
-    type Output = U256;
-
-    #[inline]
-    fn not(self) -> Self::Output {
-        let U256([a, b]) = self;
-        U256([!a, !b])
-    }
-}
-
-macro_rules! impl_bitwiseops {
-    ($(
-        $op:ident { $method:ident }
-    )*) => {$(
-        impl ops::$op<&'_ U256> for &'_ U256 {
-            type Output = U256;
-
-            #[inline]
-            fn $method(self, rhs: &'_ U256) -> Self::Output {
-                let U256([a, b]) = self;
-                let U256([rhs_a, rhs_b]) = rhs;
-                U256([a.$method(rhs_a), b.$method(rhs_b)])
-            }
-        }
-
-        impl_auto_binop!($op { $method });
-    )*};
-}
-
-impl_bitwiseops! {
-    BitAnd { bitand }
-    BitOr { bitor }
-    BitXor { bitxor }
-}
-
-macro_rules! impl_binops_assign {
-    ($(
-        $op:ident {
-            $method:ident =>
-            $wrap:path,
-            $binop:tt
-        }
-    )*) => {$(
-        impl ops::$op<&'_ U256> for U256 {
-            #[inline]
-            fn $method(&mut self, rhs: &'_ U256) {
-                binop_assign!($wrap, $binop [ self, rhs ])
-            }
-        }
-
-        impl_auto_binop_assign!($op { $method });
-    )*};
-}
-
-macro_rules! binop_assign {
-    ($wrap:path, $binop:tt [ $lhs:expr, $rhs:expr ]) => {{
-        #[cfg(not(debug_assertions))]
-        {
-            $wrap($lhs, $rhs);
-        }
-        #[cfg(debug_assertions)]
-        {
-            *($lhs) = *($lhs) $binop $rhs;
-        }
-    }};
-}
-
-macro_rules! impl_auto_binop_assign {
-    ($op:ident { $method:ident }) => {
-        impl_ref_binop_assign! {
-            $op <U256 ; &U256>::$method (rhs) {
-                <U256> for U256 => { &rhs }
-            }
-        }
-
-        impl_ref_binop_assign! {
-            $op <U256 ; U256>::$method (rhs) { u128 } => { U256::new(rhs) }
-        }
-    };
-}
-
-macro_rules! impl_ref_binop_assign {
-    (
-        $op:ident <$ref:ty ; $tr:ty> :: $method:ident ($x:ident) {$(
-            <$rhs:ty> for U256 => $conv:block
-        )*}
-    ) => {$(
-        impl ops::$op<$rhs> for U256 {
-            #[inline]
-            fn $method(&mut self, $x: $rhs) {
-                <$ref as ops::$op<$tr>>::$method(self, $conv)
-            }
-        }
-    )*};
-    (
-        $op:ident <$ref:ty ; $tr:ty> :: $method:ident ($x:ident) {
-            $($rhs:ty),* $(,)?
-        } => $conv:block
-    ) => {$(
-        impl_ref_binop_assign! {
-            $op <U256 ; $tr>::$method (rhs) {
-                <&'_ $rhs> for U256 => { let $x = *rhs; $conv }
-                <$rhs> for U256 => { let $x = rhs; $conv }
-            }
-        }
-    )*};
-}
-
-impl_binops_assign! {
-    AddAssign { add_assign => add2, + }
-    DivAssign { div_assign => udiv2, / }
-    MulAssign { mul_assign => umul2, * }
-    RemAssign { rem_assign => urem2, % }
-    SubAssign { sub_assign => sub2, - }
-}
-
-macro_rules! impl_shifts_assign {
-    ($(
-        $op:ident {
-            $method:ident =>
-                $wrap:path, $sh:tt
-        }
-    )*) => {$(
-        impl ops::$op<u32> for U256 {
-            #[inline]
-            fn $method(&mut self, rhs: u32) {
-                binop_assign!($wrap, $sh [ self, rhs ])
-            }
-        }
-
-        impl_ref_binop_assign! {
-            $op <U256 ; u32>::$method (rhs) {
-                <&'_ u32> for U256 => { *rhs }
-            }
-        }
-
-        impl_ref_binop_assign! {
-            $op <U256 ; u32>::$method (rhs) { U256 } => { *rhs.low() as _ }
-        }
-
-        impl_ref_binop_assign! {
-            $op <U256 ; u32>::$method (rhs) {
-                i8, i16, i32, i64, i128, isize,
-                u8, u16, u64, u128, usize,
-            } => { rhs as _ }
-        }
-    )*};
-}
-
-impl_shifts_assign! {
-    ShlAssign { shl_assign => ashl2, << }
-    ShrAssign { shr_assign => lshr2, >> }
-}
-
-macro_rules! impl_bitwiseops_assign {
-    ($(
-        $op:ident { $method:ident }
-    )*) => {$(
-        impl ops::$op<&'_ U256> for U256 {
-            #[inline]
-            fn $method(&mut self, rhs: &'_ U256) {
-                let U256([a, b]) = self;
-                let U256([rhs_a, rhs_b]) = rhs;
-                a.$method(rhs_a);
-                b.$method(rhs_b);
-            }
-        }
-
-        impl_auto_binop_assign!($op { $method });
-    )*};
-}
-
-impl_bitwiseops_assign! {
-    BitAndAssign { bitand_assign }
-    BitOrAssign { bitor_assign }
-    BitXorAssign { bitxor_assign }
 }
 
 #[cfg(test)]

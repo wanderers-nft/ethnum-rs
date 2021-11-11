@@ -1,7 +1,7 @@
 //! This module implements right and left rotation (**not** shifting) intrinsics
 //! for 256-bit integers.
 
-use crate::U256;
+use crate::uint::U256;
 use core::mem::MaybeUninit;
 
 #[inline]

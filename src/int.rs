@@ -1,10 +1,7 @@
 //! Root module for 256-bit unsigned integer type.
 
-mod api;
-mod convert;
-
-pub use self::convert::AsI256;
-use crate::{AsU256, uint::U256};
+//mod api;
+//mod convert;
 
 /// A 256-bit unsigned integer type.
 #[derive(Clone, Copy, Default, Eq, Hash, PartialEq)]
@@ -25,7 +22,7 @@ impl I256 {
     /// Creates a new 256-bit integer value from a primitive `i128` integer.
     #[inline]
     pub const fn new(value: i128) -> Self {
-        I256::from_words(value.signum() >> 1, value)
+        I256::from_words(value >> 127, value)
     }
 
     /// Creates a new 256-bit integer value from high and low words.
@@ -170,10 +167,12 @@ impl I256 {
         lo as _
     }
 
+    /* todo!()
     /// Cast to a `U256`.
     pub const fn as_u256(self) -> U256 {
         AsU256::as_u256(self)
     }
+    */
 
     /// Cast to a primitive `isize`.
     pub const fn as_isize(self) -> isize {
@@ -188,7 +187,7 @@ impl I256 {
     }
 
     /// Cast to a primitive `f32`.
-    pub const fn as_f32(self) -> f32 {
+    pub fn as_f32(self) -> f32 {
         self.as_f64() as _
     }
 

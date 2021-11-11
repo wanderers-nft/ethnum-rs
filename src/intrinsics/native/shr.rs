@@ -1,7 +1,17 @@
 //! Module containing logical right shift intrinsic.
 
-use crate::U256;
+use crate::{int::I256, uint::U256};
 use core::mem::MaybeUninit;
+
+#[inline]
+pub fn ashr2(_: &mut I256, _: u32) {
+    todo!()
+}
+
+#[inline]
+pub fn ashr3(_: &mut MaybeUninit<I256>, _: &I256, _: u32) {
+    todo!()
+}
 
 #[inline]
 pub fn lshr2(r: &mut U256, a: u32) {

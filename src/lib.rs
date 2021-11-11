@@ -16,6 +16,7 @@ mod fmt;
 pub mod intrinsics;
 mod iter;
 mod ops;
+mod ops2;
 mod uint;
 
 pub use self::{int::*, uint::*};
