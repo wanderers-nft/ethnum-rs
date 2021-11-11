@@ -9,7 +9,7 @@
 //! assert!(U256::ONE > 0 && U256::ZERO == 0);
 //! ```
 
-use crate::U256;
+use crate::uint::U256;
 use core::cmp::Ordering;
 
 impl Ord for U256 {
@@ -46,8 +46,7 @@ impl PartialOrd<u128> for U256 {
 
 #[cfg(test)]
 mod tests {
-    use crate::U256;
-    use core::cmp::Ordering;
+    use super::*;
 
     #[test]
     fn cmp() {

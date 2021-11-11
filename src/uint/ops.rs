@@ -377,7 +377,7 @@ impl_bitwiseops_assign! {
 
 #[cfg(test)]
 mod tests {
-    use crate::U256;
+    use super::*;
     use core::ops::*;
 
     #[test]

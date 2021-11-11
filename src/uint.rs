@@ -3,6 +3,8 @@
 mod api;
 mod cmp;
 mod convert;
+mod iter;
+mod ops;
 
 pub use self::convert::AsU256;
 
@@ -209,7 +211,7 @@ impl U256 {
 
 #[cfg(test)]
 mod tests {
-    use crate::U256;
+    use crate::uint::U256;
 
     #[test]
     #[allow(clippy::float_cmp)]

@@ -1,6 +1,6 @@
 //! Module contains iterator specific trait implementations.
 
-use crate::U256;
+use crate::uint::U256;
 use core::{
     iter::{Product, Sum},
     ops::{Add, Mul},

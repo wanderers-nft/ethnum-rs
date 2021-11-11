@@ -1,6 +1,8 @@
 //! Module containing integer aritimetic methods closely following the Rust
 //! standard library API for `uN` types.
 
+// TODO(nlordell): `signum64()` (or `signum128()`?)
+
 use super::I256;
 use crate::{fmt, intrinsics};
 use core::{

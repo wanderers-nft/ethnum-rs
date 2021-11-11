@@ -3,6 +3,7 @@
 //mod api;
 mod cmp;
 mod convert;
+mod iter;
 mod ops;
 
 // todo!()

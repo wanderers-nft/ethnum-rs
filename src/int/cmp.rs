@@ -27,12 +27,11 @@ impl_cmp! {
 
 #[cfg(test)]
 mod tests {
-    use crate::I256;
-    use core::cmp::Ordering;
-
     #[test]
     #[ignore]
     fn cmp() {
+        todo!()
+        /*
         // 1e38
         let x = I256::from_words(0, 100000000000000000000000000000000000000);
         // 1e48
@@ -46,5 +45,6 @@ mod tests {
         let y = I256::new(100);
         assert!(x <= y);
         assert_eq!(x.cmp(&y), Ordering::Equal);
+        */
     }
 }

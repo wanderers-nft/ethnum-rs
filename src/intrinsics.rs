@@ -17,7 +17,7 @@ pub use self::native::*;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::U256;
+    use crate::uint::U256;
     use core::mem::MaybeUninit;
 
     #[test]

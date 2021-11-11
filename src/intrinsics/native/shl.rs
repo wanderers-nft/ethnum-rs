@@ -1,6 +1,6 @@
 //! Module containing arithmetic left shift intrinsic.
 
-use crate::U256;
+use crate::uint::U256;
 use core::mem::MaybeUninit;
 
 #[inline]

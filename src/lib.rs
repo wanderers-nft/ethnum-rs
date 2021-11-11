@@ -16,15 +16,14 @@ mod macros {
     pub mod cmp;
     #[macro_use]
     pub mod ops;
+    #[macro_use]
+    pub mod iter;
 }
 
 mod error;
 mod fmt;
 mod int;
 pub mod intrinsics;
-mod iter;
-mod ops;
-mod ops2;
 mod uint;
 
 pub use self::{int::*, uint::*};
