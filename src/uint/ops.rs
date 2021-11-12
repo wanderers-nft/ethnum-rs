@@ -1,6 +1,6 @@
 //! Module containing macros for implementing `core::ops` traits.
 
-use crate::{intrinsics::*, U256};
+use crate::{intrinsics::signed::*, U256};
 use core::{mem::MaybeUninit, ops};
 
 macro_rules! impl_binops {
@@ -90,9 +90,9 @@ macro_rules! impl_ref_binop {
 }
 
 impl_binops! {
-    Add { add => add3, uaddc; "add with overflow" }
+    Add { add => uadd3, uaddc; "add with overflow" }
     Mul { mul => umul3, umulc; "multiply with overflow" }
-    Sub { sub => sub3, usubc; "subtract with overflow" }
+    Sub { sub => usub3, usubc; "subtract with overflow" }
 }
 
 impl ops::Div for &'_ U256 {
@@ -181,8 +181,8 @@ macro_rules! shift {
 }
 
 impl_shifts! {
-    Shl { shl => ashl3; "shift left with overflow" }
-    Shr { shr => lshr3; "shift right with overflow" }
+    Shl { shl => ushl3; "shift left with overflow" }
+    Shr { shr => ushr3; "shift right with overflow" }
 }
 
 impl ops::Not for U256 {
@@ -306,11 +306,11 @@ macro_rules! impl_ref_binop_assign {
 }
 
 impl_binops_assign! {
-    AddAssign { add_assign => add2, + }
+    AddAssign { add_assign => uadd2, + }
     DivAssign { div_assign => udiv2, / }
     MulAssign { mul_assign => umul2, * }
     RemAssign { rem_assign => urem2, % }
-    SubAssign { sub_assign => sub2, - }
+    SubAssign { sub_assign => usub2, - }
 }
 
 macro_rules! impl_shifts_assign {
@@ -347,8 +347,8 @@ macro_rules! impl_shifts_assign {
 }
 
 impl_shifts_assign! {
-    ShlAssign { shl_assign => ashl2, << }
-    ShrAssign { shr_assign => lshr2, >> }
+    ShlAssign { shl_assign => ushl2, << }
+    ShrAssign { shr_assign => ushr2, >> }
 }
 
 macro_rules! impl_bitwiseops_assign {

@@ -11,45 +11,19 @@
 //! ```
 
 use super::I256;
-use crate::intrinsics::*;
-use core::mem::MaybeUninit;
-
-/// A wrapper around `add2` that uses `I256`.
-fn iadd2(_: &mut I256, _: &I256) {
-    todo!()
-}
-
-/// A wrapper around `add3` that uses `I256`.
-#[cfg(not(debug_assertions))]
-fn iadd3(_: &mut MaybeUninit<I256>, _: &I256, _: &I256) {
-    todo!()
-}
-
-/// A wrapper around `sub3` that uses `I256`.
-#[cfg(not(debug_assertions))]
-fn isub3(_: &mut MaybeUninit<I256>, _: &I256, _: &I256) {
-    todo!()
-}
-
-/// A wrapper around `ashl2` that uses `I256`.
-fn _ishl2(_: &mut I256, _: u32) {
-    todo!()
-}
-
-/// A wrapper around `ashl3` that uses `I256`.
-fn ishl3(_: &mut MaybeUninit<I256>, _: &I256, _: u32) {
-    todo!()
-}
+use crate::intrinsics::signed::*;
 
 impl_ops! {
     for I256 | i128 {
-        add => iadd3, iaddc;
-        mul => imul3, imulc;
-        sub => isub3, isubc;
-        div => idiv3;
-        rem => irem3;
-        shl => ishl3;
-        shr => ashr3;
+        add => iadd2, iadd3, iaddc;
+        mul => imul2, imul3, imulc;
+        sub => isub2, isub3, isubc;
+
+        div => idiv2, idiv3;
+        rem => irem2, irem3;
+
+        shl => ishl2, ishl3;
+        shr => isar2, isar3;
     }
 }
 
@@ -122,6 +96,7 @@ mod tests {
                 + MulAssign<&'a I256>
                 + MulAssign<i128>
                 + MulAssign<I256>
+                + Neg
                 + Not
                 + Rem<&'a i128>
                 + Rem<&'a I256>
@@ -276,6 +251,7 @@ mod tests {
                 + Mul<&'a I256>
                 + Mul<i128>
                 + Mul<I256>
+                + Neg
                 + Not
                 + Rem<&'a i128>
                 + Rem<&'a I256>
@@ -344,6 +320,6 @@ mod tests {
         {
         }
 
-        //assert_ops::<I256>();
+        assert_ops::<I256>();
     }
 }

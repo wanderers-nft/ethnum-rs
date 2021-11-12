@@ -199,7 +199,7 @@ impl U256 {
     #[inline]
     pub fn rotate_left(self, n: u32) -> Self {
         let mut r = MaybeUninit::uninit();
-        intrinsics::rotate_left(&mut r, &self, n);
+        intrinsics::rol3(&mut r, &self, n);
         unsafe { r.assume_init() }
     }
 
@@ -227,7 +227,7 @@ impl U256 {
     #[inline]
     pub fn rotate_right(self, n: u32) -> Self {
         let mut r = MaybeUninit::uninit();
-        intrinsics::rotate_right(&mut r, &self, n);
+        intrinsics::ror3(&mut r, &self, n);
         unsafe { r.assume_init() }
     }
 
@@ -963,7 +963,7 @@ impl U256 {
     #[inline]
     pub fn wrapping_shl(self, rhs: u32) -> Self {
         let mut result = MaybeUninit::uninit();
-        intrinsics::ashl3(&mut result, &self, rhs & 0xff);
+        intrinsics::shl3(&mut result, &self, rhs & 0xff);
         unsafe { result.assume_init() }
     }
 
@@ -992,7 +992,7 @@ impl U256 {
     #[inline]
     pub fn wrapping_shr(self, rhs: u32) -> Self {
         let mut result = MaybeUninit::uninit();
-        intrinsics::lshr3(&mut result, &self, rhs & 0xff);
+        intrinsics::shr3(&mut result, &self, rhs & 0xff);
         unsafe { result.assume_init() }
     }
 

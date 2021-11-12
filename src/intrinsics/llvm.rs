@@ -53,17 +53,35 @@ def! {
     pub fn imul3(r: &mut MaybeUninit<I256>, a: &I256, b: &I256);
     //pub fn imulc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
 
-    pub fn ashl2(r: &mut U256, a: u32);
-    pub fn ashl3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
+    pub fn shl2(r: &mut U256, a: u32);
+    pub fn shl3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
 
-    pub fn ashr2(r: &mut I256, a: u32);
-    pub fn ashr3(r: &mut MaybeUninit<I256>, a: &I256, b: u32);
-    pub fn lshr2(r: &mut U256, a: u32);
-    pub fn lshr3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
+    pub fn sar2(r: &mut I256, a: u32);
+    pub fn sar3(r: &mut MaybeUninit<I256>, a: &I256, b: u32);
+    pub fn shr2(r: &mut U256, a: u32);
+    pub fn shr3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
 
-    pub fn rotate_left(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
-    pub fn rotate_right(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
+    pub fn rol3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
+    pub fn ror3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
 
     pub fn ctlz(a: &U256) -> u32;
     pub fn cttz(a: &U256) -> u32;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core::alloc::Layout;
+
+    #[test]
+    fn layout() {
+        assert_eq!(
+            Layout::new::<I256>(),
+            Layout::new::<ethnum_intrinsics::I256>()
+        );
+        assert_eq!(
+            Layout::new::<U256>(),
+            Layout::new::<ethnum_intrinsics::I256>()
+        );
+    }
 }

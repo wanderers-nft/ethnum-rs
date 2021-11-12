@@ -4,17 +4,17 @@ use crate::{int::I256, uint::U256};
 use core::mem::MaybeUninit;
 
 #[inline]
-pub fn ashr2(_: &mut I256, _: u32) {
+pub fn sar2(_: &mut I256, _: u32) {
     todo!()
 }
 
 #[inline]
-pub fn ashr3(_: &mut MaybeUninit<I256>, _: &I256, _: u32) {
+pub fn sar3(_: &mut MaybeUninit<I256>, _: &I256, _: u32) {
     todo!()
 }
 
 #[inline]
-pub fn lshr2(r: &mut U256, a: u32) {
+pub fn shr2(r: &mut U256, a: u32) {
     debug_assert!(a < 256, "shr intrinsic called with overflowing shift");
 
     let (hi, lo) = if a == 0 {
@@ -29,7 +29,7 @@ pub fn lshr2(r: &mut U256, a: u32) {
 }
 
 #[inline]
-pub fn lshr3(r: &mut MaybeUninit<U256>, a: &U256, b: u32) {
+pub fn shr3(r: &mut MaybeUninit<U256>, a: &U256, b: u32) {
     debug_assert!(b < 256, "shr intrinsic called with overflowing shift");
 
     let (hi, lo) = if b == 0 {

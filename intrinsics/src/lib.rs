@@ -5,7 +5,7 @@
 
 use core::mem::MaybeUninit;
 
-pub type U256 = [u64; 4];
+pub type I256 = [u64; 4];
 
 macro_rules! def {
     ($(
@@ -33,34 +33,34 @@ macro_rules! link {
 }
 
 def! {
-    pub fn add2(r: &mut U256, a: &U256);
-    pub fn add3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256);
-    pub fn uaddc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
-    pub fn iaddc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
+    pub fn add2(r: &mut I256, a: &I256);
+    pub fn add3(r: &mut MaybeUninit<I256>, a: &I256, b: &I256);
+    pub fn uaddc(r: &mut MaybeUninit<I256>, a: &I256, b: &I256) -> bool;
+    pub fn iaddc(r: &mut MaybeUninit<I256>, a: &I256, b: &I256) -> bool;
 
-    pub fn umul2(r: &mut U256, a: &U256);
-    pub fn umul3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256);
-    pub fn umulc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
-    pub fn imul2(r: &mut U256, a: &U256);
-    pub fn imul3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256);
-    //pub fn imulc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
+    pub fn umul2(r: &mut I256, a: &I256);
+    pub fn umul3(r: &mut MaybeUninit<I256>, a: &I256, b: &I256);
+    pub fn umulc(r: &mut MaybeUninit<I256>, a: &I256, b: &I256) -> bool;
+    pub fn imul2(r: &mut I256, a: &I256);
+    pub fn imul3(r: &mut MaybeUninit<I256>, a: &I256, b: &I256);
+    //pub fn imulc(r: &mut MaybeUninit<I256>, a: &I256, b: &I256) -> bool;
 
-    pub fn sub2(r: &mut U256, a: &U256);
-    pub fn sub3(r: &mut MaybeUninit<U256>, a: &U256, b: &U256);
-    pub fn usubc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
-    pub fn isubc(r: &mut MaybeUninit<U256>, a: &U256, b: &U256) -> bool;
+    pub fn sub2(r: &mut I256, a: &I256);
+    pub fn sub3(r: &mut MaybeUninit<I256>, a: &I256, b: &I256);
+    pub fn usubc(r: &mut MaybeUninit<I256>, a: &I256, b: &I256) -> bool;
+    pub fn isubc(r: &mut MaybeUninit<I256>, a: &I256, b: &I256) -> bool;
 
-    pub fn ashl2(r: &mut U256, a: u32);
-    pub fn ashl3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
+    pub fn shl2(r: &mut I256, a: u32);
+    pub fn shl3(r: &mut MaybeUninit<I256>, a: &I256, b: u32);
 
-    pub fn ashr2(r: &mut U256, a: u32);
-    pub fn ashr3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
-    pub fn lshr2(r: &mut U256, a: u32);
-    pub fn lshr3(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
+    pub fn sar2(r: &mut I256, a: u32);
+    pub fn sar3(r: &mut MaybeUninit<I256>, a: &I256, b: u32);
+    pub fn shr2(r: &mut I256, a: u32);
+    pub fn shr3(r: &mut MaybeUninit<I256>, a: &I256, b: u32);
 
-    pub fn rotate_left(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
-    pub fn rotate_right(r: &mut MaybeUninit<U256>, a: &U256, b: u32);
+    pub fn rol3(r: &mut MaybeUninit<I256>, a: &I256, b: u32);
+    pub fn ror3(r: &mut MaybeUninit<I256>, a: &I256, b: u32);
 
-    pub fn ctlz(a: &U256) -> u32;
-    pub fn cttz(a: &U256) -> u32;
+    pub fn ctlz(a: &I256) -> u32;
+    pub fn cttz(a: &I256) -> u32;
 }
