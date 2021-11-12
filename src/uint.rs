@@ -6,6 +6,7 @@ mod convert;
 mod iter;
 mod ops;
 
+use crate::I256;
 pub use self::convert::AsU256;
 
 /// A 256-bit unsigned integer type.
@@ -142,12 +143,11 @@ impl U256 {
         lo as _
     }
 
-    /* todo!()
     /// Cast to a `I256`.
     pub const fn as_i256(self) -> I256 {
-        AsI256::as_i256(self)
+        let Self([a, b]) = self;
+        I256([a as _, b as _])
     }
-    */
 
     /// Cast to a primitive `u8`.
     pub const fn as_u8(self) -> u8 {

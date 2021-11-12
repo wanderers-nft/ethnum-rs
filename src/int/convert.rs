@@ -28,19 +28,29 @@ impl_from! {
 ///
 /// # Examples
 ///
-/// Note that in Rust casting from a negative signed integer sign to a larger
-/// unsigned interger sign extends. Additionally casting a floating point value
-/// to an integer is a saturating operation, with `NaN` converting to `0`. So:
+/// Casting a floating point value to an integer is a saturating operation,
+/// with `NaN` converting to `0`. So:
 ///
 /// ```
 /// # use ethnum::{I256, AsI256};
-/// assert_eq!((-1i32).as_i256(), I256::MAX);
+/// assert_eq!((-1i32).as_i256(), -I256::ONE);
 /// assert_eq!(u32::MAX.as_i256(), 0xffffffff);
 ///
-/// assert_eq!(f64::NEG_INFINITY.as_i256(), 0);
-/// assert_eq!((-1.0f64).as_i256(), 0);
+/// assert_eq!(-13.37f64.as_i256(), -13);
+/// assert_eq!(42.0f64.as_i256(), -13);
+/// assert_eq!(
+///     f32::MAX.as_i256(),
+///     0xffffff00000000000000000000000000u128.as_i256(),
+/// );
+/// assert_eq!(
+///     f32::MIN.as_i256(),
+///     -0xffffff00000000000000000000000000u128.as_i256(),
+/// );
+/// 
+/// assert_eq!(f64::NEG_INFINITY.as_i256(), I256::MIN);
+/// assert_eq!(-2.0f64.powi(256).as_i256(), I256::MIN);
 /// assert_eq!(f64::INFINITY.as_i256(), I256::MAX);
-/// assert_eq!(2.0f64.powi(257).as_i256(), I256::MAX);
+/// assert_eq!(2.0f64.powi(256).as_i256(), I256::MAX);
 /// assert_eq!(f64::NAN.as_i256(), 0);
 /// ```
 pub trait AsI256 {
@@ -61,8 +71,7 @@ impl AsI256 for I256 {
 impl AsI256 for U256 {
     #[inline]
     fn as_i256(self) -> I256 {
-        let (hi, lo) = self.into_words();
-        I256::from_words(hi as _, lo as _)
+        U256::as_i256(self)
     }
 }
 
@@ -110,26 +119,22 @@ macro_rules! impl_as_i256_float {
                 const EXP_MASK: $b = !0 >> <$t>::MANTISSA_DIGITS;
                 const EXP_OFFSET: $b = EXP_MASK / 2;
                 const ABS_MASK: $b = !0 >> 1;
-                //const SIG_MASK: $b = !ABS_MASK;
+                const SIG_MASK: $b = !ABS_MASK;
 
                 let abs = <$t>::from_bits(self.to_bits() & ABS_MASK);
                 if abs >= 1.0 {
                     let bits = abs.to_bits();
                     let exponent = ((bits >> M) & EXP_MASK) - EXP_OFFSET;
                     let mantissa = (bits & MAN_MASK) | MAN_ONE;
+                    let sign = if bits & SIG_MASK == 0 { 1 } else { -1 };
                     if exponent <= 52 {
-                        I256::from(mantissa) >> (52 - exponent)
-                    } else if exponent >= 255 {
-                        todo!();
-                        /*
-                        if signum > 0 {
-                            I256::MAX
-                        } else {
-                            I256::MIN
-                        }
-                        */
+                        (I256::from(mantissa >> (52 - exponent))) * sign
+                    } else if exponent < 255 {
+                        (I256::from(mantissa) << (exponent - 52)) * sign
+                    } else if sign > 0 {
+                        I256::MAX
                     } else {
-                        todo!("I256::from(mantissa) << (exponent - 52)")
+                        I256::MIN
                     }
                 } else {
                     I256::ZERO

@@ -77,8 +77,7 @@ impl AsU256 for U256 {
 impl AsU256 for I256 {
     #[inline]
     fn as_u256(self) -> U256 {
-        let (hi, lo) = self.into_words();
-        U256::from_words(hi as _, lo as _)
+        I256::as_u256(self)
     }
 }
 
@@ -132,10 +131,10 @@ macro_rules! impl_as_u256_float {
                     let mantissa = (bits & MAN_MASK) | MAN_ONE;
                     if exponent <= 52 {
                         U256::from(mantissa >> (52 - exponent))
-                    } else if exponent >= 256 {
-                        U256::MAX
-                    } else {
+                    } else if exponent < 256 {
                         U256::from(mantissa) << (exponent - 52)
+                    } else {
+                        U256::MAX
                     }
                 } else {
                     U256::ZERO

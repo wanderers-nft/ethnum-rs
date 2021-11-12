@@ -6,8 +6,7 @@ mod convert;
 mod iter;
 mod ops;
 
-// todo!()
-mod temp;
+use crate::uint::U256;
 
 /// A 256-bit unsigned integer type.
 #[derive(Clone, Copy, Default, Eq, Hash, PartialEq)]
@@ -173,12 +172,11 @@ impl I256 {
         lo as _
     }
 
-    /* todo!()
     /// Cast to a `U256`.
     pub const fn as_u256(self) -> U256 {
-        AsU256::as_u256(self)
+        let Self([a, b]) = self;
+        U256([a as _, b as _])
     }
-    */
 
     /// Cast to a primitive `isize`.
     pub const fn as_isize(self) -> isize {
@@ -212,5 +210,21 @@ mod tests {
     #[allow(clippy::float_cmp)]
     fn converts_to_f64() {
         assert_eq!(I256::from_words(1, 0).as_f64(), 2.0f64.powi(128))
+    }
+}
+
+// todo!()
+#[allow(missing_docs)]
+impl I256 {
+    pub const MAX: I256 = I256::from_words(i128::MAX, -1);
+    pub const MIN: I256 = I256::from_words(i128::MIN, 0);
+    pub fn checked_mul(self, _: Self) -> Option<Self> {
+        todo!()
+    }
+    pub fn checked_sub(self, _: Self) -> Option<Self> {
+        todo!()
+    }
+    pub fn checked_add(self, _: Self) -> Option<Self> {
+        todo!()
     }
 }
