@@ -1,8 +1,9 @@
-//! Root module for 256-bit unsigned integer type.
+//! Root module for 256-bit signed integer type.
 
-//mod api;
+mod api;
 mod cmp;
 mod convert;
+mod fmt;
 mod iter;
 mod ops;
 
@@ -210,21 +211,5 @@ mod tests {
     #[allow(clippy::float_cmp)]
     fn converts_to_f64() {
         assert_eq!(I256::from_words(1, 0).as_f64(), 2.0f64.powi(128))
-    }
-}
-
-// todo!()
-#[allow(missing_docs)]
-impl I256 {
-    pub const MAX: I256 = I256::from_words(i128::MAX, -1);
-    pub const MIN: I256 = I256::from_words(i128::MIN, 0);
-    pub fn checked_mul(self, _: Self) -> Option<Self> {
-        todo!()
-    }
-    pub fn checked_sub(self, _: Self) -> Option<Self> {
-        todo!()
-    }
-    pub fn checked_add(self, _: Self) -> Option<Self> {
-        todo!()
     }
 }

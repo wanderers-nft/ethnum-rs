@@ -3,11 +3,12 @@
 mod api;
 mod cmp;
 mod convert;
+mod fmt;
 mod iter;
 mod ops;
 
-use crate::I256;
 pub use self::convert::AsU256;
+use crate::I256;
 
 /// A 256-bit unsigned integer type.
 #[derive(Clone, Copy, Default, Eq, Hash, PartialEq)]

@@ -121,7 +121,7 @@ impl U256 {
     /// ```
     #[inline]
     pub fn leading_zeros(self) -> u32 {
-        intrinsics::ctlz(&self)
+        intrinsics::signed::uctlz(&self)
     }
 
     /// Returns the number of trailing zeros in the binary representation of
@@ -138,7 +138,7 @@ impl U256 {
     /// ```
     #[inline]
     pub fn trailing_zeros(self) -> u32 {
-        intrinsics::cttz(&self)
+        intrinsics::signed::ucttz(&self)
     }
 
     /// Returns the number of leading ones in the binary representation of
@@ -199,7 +199,7 @@ impl U256 {
     #[inline]
     pub fn rotate_left(self, n: u32) -> Self {
         let mut r = MaybeUninit::uninit();
-        intrinsics::rol3(&mut r, &self, n);
+        intrinsics::signed::urol3(&mut r, &self, n);
         unsafe { r.assume_init() }
     }
 
@@ -227,7 +227,7 @@ impl U256 {
     #[inline]
     pub fn rotate_right(self, n: u32) -> Self {
         let mut r = MaybeUninit::uninit();
-        intrinsics::ror3(&mut r, &self, n);
+        intrinsics::signed::uror3(&mut r, &self, n);
         unsafe { r.assume_init() }
     }
 
@@ -773,7 +773,7 @@ impl U256 {
     #[inline]
     pub fn wrapping_add(self, rhs: Self) -> Self {
         let mut result = MaybeUninit::uninit();
-        intrinsics::add3(&mut result, &self, &rhs);
+        intrinsics::signed::uadd3(&mut result, &self, &rhs);
         unsafe { result.assume_init() }
     }
 
@@ -794,7 +794,7 @@ impl U256 {
     #[inline]
     pub fn wrapping_sub(self, rhs: Self) -> Self {
         let mut result = MaybeUninit::uninit();
-        intrinsics::sub3(&mut result, &self, &rhs);
+        intrinsics::signed::usub3(&mut result, &self, &rhs);
         unsafe { result.assume_init() }
     }
 
@@ -818,7 +818,7 @@ impl U256 {
     #[inline]
     pub fn wrapping_mul(self, rhs: Self) -> Self {
         let mut result = MaybeUninit::uninit();
-        intrinsics::umul3(&mut result, &self, &rhs);
+        intrinsics::signed::umul3(&mut result, &self, &rhs);
         unsafe { result.assume_init() }
     }
 
@@ -963,7 +963,7 @@ impl U256 {
     #[inline]
     pub fn wrapping_shl(self, rhs: u32) -> Self {
         let mut result = MaybeUninit::uninit();
-        intrinsics::shl3(&mut result, &self, rhs & 0xff);
+        intrinsics::signed::ushl3(&mut result, &self, rhs & 0xff);
         unsafe { result.assume_init() }
     }
 
@@ -992,7 +992,7 @@ impl U256 {
     #[inline]
     pub fn wrapping_shr(self, rhs: u32) -> Self {
         let mut result = MaybeUninit::uninit();
-        intrinsics::shr3(&mut result, &self, rhs & 0xff);
+        intrinsics::signed::ushr3(&mut result, &self, rhs & 0xff);
         unsafe { result.assume_init() }
     }
 
@@ -1059,7 +1059,7 @@ impl U256 {
     #[inline]
     pub fn overflowing_add(self, rhs: Self) -> (Self, bool) {
         let mut result = MaybeUninit::uninit();
-        let overflow = intrinsics::uaddc(&mut result, &self, &rhs);
+        let overflow = intrinsics::signed::uaddc(&mut result, &self, &rhs);
         (unsafe { result.assume_init() }, overflow)
     }
 
@@ -1083,7 +1083,7 @@ impl U256 {
     #[inline]
     pub fn overflowing_sub(self, rhs: Self) -> (Self, bool) {
         let mut result = MaybeUninit::uninit();
-        let overflow = intrinsics::usubc(&mut result, &self, &rhs);
+        let overflow = intrinsics::signed::usubc(&mut result, &self, &rhs);
         (unsafe { result.assume_init() }, overflow)
     }
 
@@ -1113,7 +1113,7 @@ impl U256 {
     #[inline]
     pub fn overflowing_mul(self, rhs: Self) -> (Self, bool) {
         let mut result = MaybeUninit::uninit();
-        let overflow = intrinsics::umulc(&mut result, &self, &rhs);
+        let overflow = intrinsics::signed::umulc(&mut result, &self, &rhs);
         (unsafe { result.assume_init() }, overflow)
     }
 
