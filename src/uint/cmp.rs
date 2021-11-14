@@ -5,6 +5,7 @@
 //!
 //! ```
 //! # use ethnum::U256;
+//! 
 //! assert_eq!(U256::new(42), 42);
 //! assert!(U256::ONE > 0 && U256::ZERO == 0);
 //! ```
@@ -19,29 +20,8 @@ impl Ord for U256 {
     }
 }
 
-impl PartialOrd for U256 {
-    #[inline]
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq<u128> for U256 {
-    #[inline]
-    fn eq(&self, other: &u128) -> bool {
-        *self.high() == 0 && self.low() == other
-    }
-}
-
-impl PartialOrd<u128> for U256 {
-    #[inline]
-    fn partial_cmp(&self, rhs: &u128) -> Option<Ordering> {
-        Some(if *self.high() == 0 {
-            self.low().cmp(rhs)
-        } else {
-            Ordering::Greater
-        })
-    }
+impl_cmp! {
+    impl Cmp for U256 (u128);
 }
 
 #[cfg(test)]

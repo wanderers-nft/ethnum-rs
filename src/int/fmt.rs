@@ -2,7 +2,9 @@
 
 use crate::int::I256;
 
-impl_fmt! { for I256 }
+impl_fmt! {
+    impl Fmt for I256;
+}
 
 #[cfg(test)]
 mod tests {

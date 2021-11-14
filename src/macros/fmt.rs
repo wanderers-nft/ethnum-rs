@@ -1,7 +1,7 @@
 //! Module containing macros for implementing `core::fmt` traits.
 
 macro_rules! impl_fmt {
-    (for $int:ident) => {
+    (impl Fmt for $int:ident;) => {
         impl $crate::fmt::FromStrRadixHelper for $int {
             #[inline]
             fn min_value() -> Self {

@@ -17,12 +17,7 @@ use core::cmp::Ordering;
 impl Ord for I256 {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        let (hi, lo) = (self - other).into_words();
-        match hi.cmp(&0) {
-            Ordering::Less => Ordering::Less,
-            Ordering::Equal => (lo as u128).cmp(&0),
-            Ordering::Greater => Ordering::Greater,
-        }
+        self.saturating_sub(*other).signum128().cmp(&0)
     }
 }
 
@@ -49,5 +44,8 @@ mod tests {
         let y = I256::new(100);
         assert!(x <= y);
         assert_eq!(x.cmp(&y), Ordering::Equal);
+
+        assert!(I256::MAX > I256::MIN);
+        assert!(I256::MIN < I256::MAX);
     }
 }

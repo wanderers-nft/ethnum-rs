@@ -2,7 +2,7 @@
 
 use super::I256;
 use crate::{error::tfie, uint::U256};
-use core::{convert::TryFrom, num::TryFromIntError};
+use core::num::TryFromIntError;
 
 macro_rules! impl_from {
     ($($t:ty),* $(,)?) => {$(
@@ -19,6 +19,17 @@ impl_from! {
     bool,
     i8, i16, i32, i64, i128,
     u8, u16, u32, u64, u128,
+}
+
+impl TryFrom<U256> for I256 {
+    type Error = TryFromIntError;
+
+    fn try_from(value: U256) -> Result<Self, Self::Error> {
+        if value > I256::MAX.as_u256() {
+            return Err(tfie());
+        }
+        Ok(value.as_i256())
+    }
 }
 
 /// This trait defines `as` conversions (casting) from primitive types to
@@ -46,7 +57,7 @@ impl_from! {
 ///     f32::MIN.as_i256(),
 ///     -0xffffff00000000000000000000000000u128.as_i256(),
 /// );
-/// 
+///
 /// assert_eq!(f64::NEG_INFINITY.as_i256(), I256::MIN);
 /// assert_eq!(-2.0f64.powi(256).as_i256(), I256::MIN);
 /// assert_eq!(f64::INFINITY.as_i256(), I256::MAX);

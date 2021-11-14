@@ -2,7 +2,9 @@
 
 use crate::uint::U256;
 
-impl_fmt! { for U256 }
+impl_fmt! {
+    impl Fmt for U256;
+}
 
 #[cfg(test)]
 mod tests {

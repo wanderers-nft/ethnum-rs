@@ -37,6 +37,17 @@ impl_try_from! {
     isize, usize,
 }
 
+impl TryFrom<I256> for U256 {
+    type Error = TryFromIntError;
+
+    fn try_from(value: I256) -> Result<Self, Self::Error> {
+        if value < 0 {
+            return Err(tfie());
+        }
+        Ok(value.as_u256())
+    }
+}
+
 /// This trait defines `as` conversions (casting) from primitive types to
 /// [`U256`].
 ///
