@@ -17,7 +17,12 @@ use core::cmp::Ordering;
 impl Ord for I256 {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        (self - other).high().cmp(&0)
+        let (hi, lo) = (self - other).into_words();
+        match hi.cmp(&0) {
+            Ordering::Less => Ordering::Less,
+            Ordering::Equal => (lo as u128).cmp(&0),
+            Ordering::Greater => Ordering::Greater,
+        }
     }
 }
 
@@ -27,11 +32,10 @@ impl_cmp! {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    #[ignore]
     fn cmp() {
-        todo!()
-        /*
         // 1e38
         let x = I256::from_words(0, 100000000000000000000000000000000000000);
         // 1e48
@@ -45,6 +49,5 @@ mod tests {
         let y = I256::new(100);
         assert!(x <= y);
         assert_eq!(x.cmp(&y), Ordering::Equal);
-        */
     }
 }

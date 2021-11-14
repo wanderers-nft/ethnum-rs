@@ -19,7 +19,7 @@ impl U256 {
     /// # use ethnum::U256;
     /// assert_eq!(U256::MIN, U256::new(0));
     /// ```
-    pub const MIN: Self = U256([0; 2]);
+    pub const MIN: Self = Self([0; 2]);
 
     /// The largest value that can be represented by this integer type.
     ///
@@ -34,7 +34,7 @@ impl U256 {
     ///     "115792089237316195423570985008687907853269984665640564039457584007913129639935",
     /// );
     /// ```
-    pub const MAX: Self = U256([!0; 2]);
+    pub const MAX: Self = Self([!0; 2]);
 
     /// The size of this integer type in bits.
     ///
@@ -86,7 +86,7 @@ impl U256 {
     /// ```
     #[inline]
     pub const fn count_ones(self) -> u32 {
-        let U256([a, b]) = self;
+        let Self([a, b]) = self;
         a.count_ones() + b.count_ones()
     }
 
@@ -103,7 +103,7 @@ impl U256 {
     /// ```
     #[inline]
     pub const fn count_zeros(self) -> u32 {
-        let U256([a, b]) = self;
+        let Self([a, b]) = self;
         a.count_zeros() + b.count_zeros()
     }
 
@@ -253,8 +253,8 @@ impl U256 {
     /// ```
     #[inline]
     pub const fn swap_bytes(self) -> Self {
-        let U256([a, b]) = self;
-        U256([b.swap_bytes(), a.swap_bytes()])
+        let Self([a, b]) = self;
+        Self([b.swap_bytes(), a.swap_bytes()])
     }
 
     /// Reverses the bit pattern of the integer.
@@ -279,8 +279,8 @@ impl U256 {
     /// ```
     #[inline]
     pub const fn reverse_bits(self) -> Self {
-        let U256([a, b]) = self;
-        U256([b.reverse_bits(), a.reverse_bits()])
+        let Self([a, b]) = self;
+        Self([b.reverse_bits(), a.reverse_bits()])
     }
 
     /// Converts an integer from big endian to the target's endianness.
@@ -1621,7 +1621,7 @@ impl U256 {
     /// # use ethnum::U256;
     /// use std::convert::TryInto;
     ///
-    /// fn read_be_U256(input: &mut &[u8]) -> U256 {
+    /// fn read_be_u256(input: &mut &[u8]) -> U256 {
     ///     let (int_bytes, rest) = input.split_at(std::mem::size_of::<U256>());
     ///     *input = rest;
     ///     U256::from_be_bytes(int_bytes.try_into().unwrap())
@@ -1659,7 +1659,7 @@ impl U256 {
     /// # use ethnum::U256;
     /// use std::convert::TryInto;
     ///
-    /// fn read_be_U256(input: &mut &[u8]) -> U256 {
+    /// fn read_be_u256(input: &mut &[u8]) -> U256 {
     ///     let (int_bytes, rest) = input.split_at(std::mem::size_of::<U256>());
     ///     *input = rest;
     ///     U256::from_le_bytes(int_bytes.try_into().unwrap())
@@ -1711,7 +1711,7 @@ impl U256 {
     /// # use ethnum::U256;
     /// use std::convert::TryInto;
     ///
-    /// fn read_be_U256(input: &mut &[u8]) -> U256 {
+    /// fn read_be_u256(input: &mut &[u8]) -> U256 {
     ///     let (int_bytes, rest) = input.split_at(std::mem::size_of::<U256>());
     ///     *input = rest;
     ///     U256::from_ne_bytes(int_bytes.try_into().unwrap())

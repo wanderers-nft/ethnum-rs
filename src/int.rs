@@ -25,6 +25,9 @@ impl I256 {
     /// The multiplicative identity for this integer type, i.e. `1`.
     pub const ONE: Self = I256::new(1);
 
+    /// The multiplicative inverse for this integer type, i.e. `-1`.
+    pub const MINUS_ONE: Self = I256::new(-1);
+
     /// Creates a new 256-bit integer value from a primitive `i128` integer.
     #[inline]
     pub const fn new(value: i128) -> Self {
@@ -210,6 +213,6 @@ mod tests {
     #[ignore]
     #[allow(clippy::float_cmp)]
     fn converts_to_f64() {
-        assert_eq!(I256::from_words(1, 0).as_f64(), 2.0f64.powi(128))
+        assert_eq!((-I256::from_words(1, 0)).as_f64(), -2.0f64.powi(128))
     }
 }

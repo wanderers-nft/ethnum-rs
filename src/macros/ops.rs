@@ -127,9 +127,15 @@ macro_rules! impl_ops_neg {
         __impl_ops_unop! {
             impl Neg for $int {
                 neg(x) {
-                    let mut x = !x;
-                    $add2(&mut x, &$int::ONE);
-                    x
+                    #[cfg(debug_assertions)]
+                    {
+                        if x.eq(&I256::MIN) {
+                            panic!("attempt to negate with overflow");
+                        }
+                    }
+                    let mut result = !x;
+                    $add2(&mut result, &$int::ONE);
+                    result
                 }
             }
         }

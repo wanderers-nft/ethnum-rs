@@ -193,7 +193,7 @@ impl U256 {
     }
 
     /// Cast to a primitive `f32`.
-    pub const fn as_f32(self) -> f32 {
+    pub fn as_f32(self) -> f32 {
         match self.into_words() {
             (0, lo) => lo as _,
             _ => f32::INFINITY,
