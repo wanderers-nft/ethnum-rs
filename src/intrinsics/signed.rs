@@ -9,20 +9,8 @@ pub use super::{
     shl2 as ushl2, shl3 as ushl3, shr2 as ushr2, shr3 as ushr3, sub2 as usub2, sub3 as usub3,
     uaddc, udiv2, udiv3, umul2, umul3, umulc, urem2, urem3, usubc,
 };
-use crate::{int::I256, uint::U256};
+use crate::int::I256;
 use core::mem::MaybeUninit;
-
-macro_rules! cast {
-    (mut: $x:expr) => {
-        unsafe { &mut *($x as *mut I256).cast::<U256>() }
-    };
-    (ref: $x:expr) => {
-        unsafe { &*($x as *const I256).cast::<U256>() }
-    };
-    (uninit: $x:expr) => {
-        unsafe { &mut *($x).as_mut_ptr().cast::<MaybeUninit<U256>>() }
-    };
-}
 
 #[inline]
 pub fn iadd2(r: &mut I256, a: &I256) {
@@ -77,6 +65,7 @@ pub fn icttz(a: &I256) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::uint::U256;
     use core::alloc::Layout;
 
     #[test]

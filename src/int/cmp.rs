@@ -17,7 +17,18 @@ use core::cmp::Ordering;
 impl Ord for I256 {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
-        self.saturating_sub(*other).signum128().cmp(&0)
+        match self.high().cmp(other.high()) {
+            Ordering::Less => Ordering::Less,
+            Ordering::Equal => {
+                let (a, b) = if self.high().is_positive() {
+                    (self, other)
+                } else {
+                    (other, self)
+                };
+                (*a.low() as u128).cmp(&(*b.low() as u128))
+            }
+            Ordering::Greater => Ordering::Greater,
+        }
     }
 }
 

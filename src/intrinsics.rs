@@ -11,6 +11,9 @@
 
 #![allow(missing_docs)]
 
+#[macro_use]
+mod cast;
+
 #[cfg(feature = "llvm-intrinsics")]
 mod llvm;
 #[cfg(not(feature = "llvm-intrinsics"))]

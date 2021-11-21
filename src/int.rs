@@ -201,7 +201,8 @@ impl I256 {
 
     /// Cast to a primitive `f64`.
     pub fn as_f64(self) -> f64 {
-        todo!()
+        let sign = self.signum128() as f64;
+        self.unsigned_abs().as_f64() * sign
     }
 }
 
