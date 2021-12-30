@@ -1,9 +1,9 @@
 [package]
 name = "ethnum"
 version = "1.0.4"
-authors = ["Nicholas Rodrigues Lordello <nlordell@gmail.com>"]
+authors = ["Nicholas Rodrigues Lordello <nlordell@gmail.com>", "Emerald Cheung <emerald@wanderers.ai>"]
 edition = "2018"
-description = "256-bit unsigned integer implementation"
+description = "256-bit unsigned integer implementation, with serde implementation"
 documentation = "https://docs.rs/ethnum"
 readme = "README.md"
 homepage = "https://github.com/nlordell/ethnum-rs"
@@ -23,3 +23,4 @@ llvm-intrinsics = ["ethnum-intrinsics"]
 
 [dependencies]
 ethnum-intrinsics = { version = "1", path = "intrinsics", optional = true }
+serde = { version = "~1.0.130", features = ["derive"] }
